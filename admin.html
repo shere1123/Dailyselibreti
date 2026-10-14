@@ -212,8 +212,11 @@ td{color:#eee}
             <textarea id="newsExcerpt" maxlength="1000" placeholder="समाचारको छोटो परिचय..."></textarea>
           </div>
           <div class="field full">
-            <label>समाचारको पूरा सामग्री *</label>
-            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्..."></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+              <label style="margin-bottom:0">समाचारको पूरा सामग्री *</label>
+              <button type="button" id="insertContentImageBtn" class="btn secondary" style="padding:4px 10px; font-size:13px;">📷 बीचमा फोटो राख्नुहोस्</button>
+            </div>
+            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्... (जहाँ फोटो राख्नु छ, त्यहाँ कर्सर राखेर माथिको बटन थिच्नुहोस्)"></textarea>
           </div>
         </div>
         <button class="btn" type="submit" id="saveNewsBtn">Save गर्नुहोस्</button>
@@ -229,7 +232,6 @@ td{color:#eee}
           <label>Header Banner Ad Code (Top को लागि)</label>
           <textarea id="adHeader" placeholder="Header ad code..."></textarea>
         </div>
-        <!-- विशेष थप गरिएको बक्स: सुरुको ७० शब्दमा देखाउने AdSense / Banner Ad -->
         <div class="field" style="background: #201515; padding: 12px; border-radius: 8px; border: 1px dashed var(--red);">
           <label style="color: #ff6b7b;">🔥 AdSense / Banner Ad Code (सुरुको ७० शब्दमा स्वतः देखाउने)</label>
           <textarea id="adSense70" placeholder="AdSense banner code here..."></textarea>
@@ -297,7 +299,7 @@ td{color:#eee}
           <input id="siteLogo" type="url" placeholder="https://example.com/logo.png">
         </div>
         <button class="btn" type="submit" id="saveSettingsBtn">Settings Save गर्नुहोस्</button>
-        <div id="settingsMsg" class="msg"></div>
+        <div id="settingsMsg" class="msg">कोषहरू सुरक्षित गर्नुहोस्</div>
       </form>
     </section>
   </main>
@@ -355,6 +357,25 @@ function showPage(name) {
 }
 document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
+
+// समाचारको बीचमा फोटो राख्ने बटनको फिचर
+$("insertContentImageBtn").addEventListener("click", () => {
+  const imgUrl = prompt("फोटोको Direct URL (जस्तै ImgBB वा ड्राइभको लिङ्क) यहाँ हाल्नुहोस्:");
+  if (!imgUrl) return;
+  const validUrl = validHttpUrl(imgUrl.trim());
+  if (!validUrl) {
+    alert("अमान्य URL! कृपया सही लिङ्क हाल्नुहोस्।");
+    return;
+  }
+  const tag = `\n<img src="${validUrl}" alt="Photo" style="max-width:100%;height:auto;border-radius:8px;margin:10px 0;">\n`;
+  const textarea = $("newsContent");
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  textarea.value = text.substring(0, start) + tag + text.substring(end);
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+});
 
 $("loginForm").addEventListener("submit", async e => {
   e.preventDefault();
