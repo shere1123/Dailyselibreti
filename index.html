@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#151515">
+<title>DailySelibreti — News, Movies & Celebrity</title>
+<meta name="description" content="DailySelibreti latest movie, celebrity, health and world news.">
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#e50925;--dark:#151515;--ink:#222;--muted:#7b7b7b;--bg:#f5f5f5;--line:#e8e8e8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Mukta,sans-serif;line-height:1.6}
+a{text-decoration:none;color:inherit}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{width:94%;max-width:1240px;margin:auto}
+
+.top{background:#111;color:#fff;border-bottom:4px solid var(--red)}
+.top-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:82px;padding:10px 0}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:50px;height:50px;background:var(--red);border-radius:8px;display:grid;place-items:center;font:900 24px Roboto;color:white;box-shadow:4px 4px 0 #ffffff26}
+.brand-title{font:900 clamp(20px,3vw,30px)/1.1 Roboto;letter-spacing:-.7px}
+.brand-title span{color:#ff4056}
+.tagline{font-size:11px;color:#bdbdbd;margin-top:5px}
+.tools{display:flex;align-items:center;gap:8px}
+.search{display:flex;background:#fff;height:38px;border-radius:4px;overflow:hidden;width:clamp(130px,23vw,270px)}
+.search input{border:0;outline:0;min-width:0;width:100%;padding:0 10px;font-size:12px}
+.search button{border:0;background:var(--red);color:#fff;width:40px;font-size:18px}
+.menu-btn{height:38px;width:40px;border:1px solid #444;background:#242424;color:white;border-radius:4px;font-size:21px}
+.nav{background:#fff;border-bottom:1px solid #ddd}
+.nav-inner{display:flex;overflow-x:auto;scrollbar-width:thin}
+.nav a{white-space:nowrap;padding:12px 14px;font-size:13px;font-weight:800;border-bottom:3px solid transparent}
+.nav a:hover,.nav a.active{color:var(--red);border-bottom-color:var(--red)}
+.overlay{position:fixed;inset:0;background:#0009;z-index:80;opacity:0;visibility:hidden;transition:.2s}
+.overlay.show{opacity:1;visibility:visible}
+.drawer{position:fixed;z-index:81;left:0;top:0;bottom:0;width:min(320px,86vw);background:#fff;transform:translateX(-105%);transition:.25s;overflow:auto;box-shadow:10px 0 30px #0002}
+.drawer.open{transform:translateX(0)}
+.drawer-head{background:#111;color:white;padding:20px;border-bottom:4px solid var(--red)}
+.drawer-head .brand-title{font-size:23px}
+.drawer-head p{font-size:12px;color:#bbb;margin:9px 0 0}
+.close{float:right;background:#333;border:0;color:#fff;border-radius:4px;width:32px;height:32px;font-size:21px}
+.drawer-label{font-size:11px;font-weight:800;letter-spacing:1px;color:#999;padding:15px 18px 5px}
+.drawer-link{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:11px 18px;background:white;border:0;border-left:3px solid transparent;font-size:14px;font-weight:700;color:#333}
+.drawer-link span{width:22px;font-size:17px}
+.drawer-link:hover,.drawer-link.active{background:#fff0f1;color:var(--red);border-left-color:var(--red)}
+.breaking{display:flex;background:white;margin:15px 0 8px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.breaking strong{background:var(--red);color:white;padding:6px 10px;font-size:11px;white-space:nowrap}
+.breaking span{padding:6px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Compact Small Banner Ad Styling */
+.main-top-ad{
+  margin:8px 0 14px;
+  background:#fff;
+  border:1px dashed #d0d0d0;
+  border-radius:3px;
+  padding:5px 8px;
+  text-align:center;
+}
+.ad-label{font-size:9px;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:2px;display:block;}
+.ad-slot{font-size:11px;color:#555;font-weight:600;min-height:45px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;border-radius:2px;}
+
+.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:2px solid #222;margin:22px 0 12px;padding-bottom:6px}
+.heading h2{margin:0;font-size:20px;font-weight:800;line-height:1.35}
+.heading h2:after{content:"";display:block;width:40px;height:3px;background:var(--red);margin-top:5px}
+.heading a{font-size:12px;color:var(--red);font-weight:800;white-space:nowrap}
+.hero-grid{display:grid;grid-template-columns:1.7fr 1fr;gap:15px}
+.hero{position:relative;height:380px;background:#222;overflow:hidden;color:#fff}
+.hero img{width:100%;height:100%;object-fit:cover;display:block;transition:.3s}
+.hero:hover img{transform:scale(1.025)}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#000e,transparent 75%)}
+.hero-copy{position:absolute;z-index:2;bottom:0;left:0;right:0;padding:23px}
+.badge{display:inline-block;background:var(--red);color:white;padding:3px 9px;font-size:11px;font-weight:800}
+.hero h2{font-size:clamp(22px,3vw,34px);line-height:1.3;margin:10px 0}
+.hero small{color:#ddd}
+.hero-side{display:grid;grid-template-rows:1fr 1fr;gap:15px}
+.side-story{display:grid;grid-template-columns:43% 1fr;background:white;min-height:180px;overflow:hidden}
+.side-story img{width:100%;height:100%;min-height:180px;object-fit:cover}
+.side-copy{padding:13px}
+.side-copy h3{font-size:16px;line-height:1.4;margin:9px 0}
+.meta{font-size:11px;color:var(--muted)}
+.categories{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.cat{background:white;border:1px solid #e5e5e5;padding:13px 4px;text-align:center;font-weight:800;font-size:12px;transition:.2s}
+.cat .emoji{display:block;font-size:23px;margin-bottom:5px}
+.cat:hover{border-color:var(--red);color:var(--red);transform:translateY(-3px)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{background:white;min-width:0;border:1px solid #e9e9e9;transition:.2s}
+.card:hover{box-shadow:0 7px 22px #0000000e;transform:translateY(-3px)}
+.card-img{display:block;background:#e5e5e5;overflow:hidden}
+.card-img img{width:100%;height:180px;object-fit:cover;display:block;transition:.3s}
+.card:hover .card-img img{transform:scale(1.03)}
+.card-body{padding:13px}
+.card-cat{font-size:11px;color:var(--red);font-weight:800}
+.card h3{font-size:16px;line-height:1.45;margin:5px 0 8px;font-weight:800}
+.card h3 a:hover{color:var(--red)}
+.excerpt{font-size:12px;color:#6f6f6f;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.read{display:inline-block;color:var(--red);font-size:12px;font-weight:800;margin-top:9px}
+
+/* Small Compact Feed Ad Banner */
+.feed-ad-banner{margin:20px 0;background:#fff;border:1px solid var(--line);padding:8px 10px;text-align:center;border-radius:3px;}
+
+.state{grid-column:1/-1;background:white;padding:26px;text-align:center;border:1px dashed #ccc;color:#666}
+.hidden{display:none!important}
+.footer{background:#111;color:#ccc;margin-top:40px;padding:30px 0 15px;border-top:4px solid var(--red)}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:25px}
+.footer h3{font-size:15px;color:#fff;margin:0 0 12px}
+.footer p,.footer-links{font-size:13px}
+.footer-links{display:grid;gap:7px}
+.footer-links a:hover{color:#ff4056}
+.footer-logo{font:900 23px Roboto;color:white}
+.footer-logo span{color:#ff4056}
+.copy{text-align:center;border-top:1px solid #333;margin-top:20px;padding-top:12px;font-size:11px;color:#999}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.categories{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){
+ .top-inner{min-height:68px;gap:6px}.logo{width:40px;height:40px;font-size:20px}.brand{gap:8px}.brand-title{font-size:19px}.tagline{font-size:9px}
+ .search{width:clamp(100px,29vw,170px);height:34px}.search input{padding:0 7px;font-size:11px}.search button{width:32px}.menu-btn{width:35px;height:34px}
+ .nav a{padding:10px 11px;font-size:12px}.breaking{margin:10px 0 6px}.breaking strong,.breaking span{font-size:10px;padding:5px 8px}
+ .heading{margin:18px 0 10px}.heading h2{font-size:18px}
+ .hero-grid{grid-template-columns:1fr;gap:10px}.hero{height:270px}.hero-copy{padding:15px}.hero h2{font-size:22px}
+ .hero-side{grid-template-columns:1fr 1fr;grid-template-rows:auto;gap:9px}.side-story{display:block}.side-story img{height:105px;min-height:105px}.side-copy{padding:9px}.side-copy h3{font-size:13px}
+ .categories{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.cat{font-size:10px;padding:9px 2px}.cat .emoji{font-size:20px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card-img img{height:130px}.card-body{padding:9px}.card h3{font-size:14px}.excerpt{font-size:11px}
+ .footer-grid{grid-template-columns:1fr 1fr;gap:20px}.footer-about{grid-column:1/-1}
+}
+@media(max-width:370px){.brand-title{font-size:16px}.tagline{font-size:8px}.logo{width:35px;height:35px}.search{width:92px}.card-img img{height:110px}.card h3{font-size:13px}}
+</style>
+</head>
+<body>
+
+<header class="top">
+ <div class="wrap top-inner">
+  <a class="brand" href="index.html">
+   <div class="logo">DS</div>
+   <div><div class="brand-title">Daily<span>Selibreti</span></div>
+   <div class="tagline">NEWS • MOVIES • CELEBRITY</div></div>
+  </a>
+  <div class="tools">
+   <form class="search" id="searchForm">
+    <input id="searchInput" placeholder="Search news..." aria-label="Search news">
+    <button aria-label="Search">⌕</button>
+   </form>
+   <button class="menu-btn" id="openMenu" aria-label="Open menu">☰</button>
+  </div>
+ </div>
+</header>
+
+<nav class="nav"><div class="wrap nav-inner" id="topNav">
+ <a href="#" data-cat="all" class="active">HOME</a>
+ <a href="#" data-cat="Hindi Movies">HINDI MOVIES</a>
+ <a href="#" data-cat="Hollywood Movies">HOLLYWOOD</a>
+ <a href="#" data-cat="Nepali Movies">NEPALI MOVIES</a>
+ <a href="#" data-cat="World History">WORLD HISTORY</a>
+ <a href="#" data-cat="Health Tips">HEALTH TIPS</a>
+ <a href="#" data-cat="Political News">POLITICS</a>
+ <a href="#" data-cat="Celebrity Lifestyle">CELEBRITY</a>
+</div></nav>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer">
+ <div class="drawer-head">
+  <button class="close" id="closeMenu">×</button>
+  <div class="brand"><div class="logo">DS</div><div class="brand-title">Daily<span>Selibreti</span></div></div>
+  <p>News, entertainment and celebrity updates</p>
+ </div>
+ <div class="drawer-label">MAIN MENU</div>
+ <button class="drawer-link active" data-drawer="all"><span>⌂</span> Home / Latest News</button>
+ <div class="drawer-label">CATEGORIES</div>
+ <button class="drawer-link" data-drawer="Hindi Movies"><span>🎬</span> Hindi Movies</button>
+ <button class="drawer-link" data-drawer="Hollywood Movies"><span>🎥</span> Hollywood Movies</button>
+ <button class="drawer-link" data-drawer="Nepali Movies"><span>🇳🇵</span> Nepali Movies</button>
+ <button class="drawer-link" data-drawer="World History"><span>🌍</span> World History</button>
+ <button class="drawer-link" data-drawer="Health Tips"><span>💚</span> Health Tips</button>
+ <button class="drawer-link" data-drawer="Political News"><span>📰</span> Political News</button>
+ <button class="drawer-link" data-drawer="Celebrity Lifestyle"><span>⭐</span> Celebrity Lifestyle</button>
+ <div class="drawer-label">INFORMATION</div>
+ <a class="drawer-link" href="about.html"><span>ℹ️</span> About Us</a>
+ <a class="drawer-link" href="contact.html"><span>✉️</span> Contact Us</a>
+ <a class="drawer-link" href="privacy.html"><span>🔒</span> Privacy Policy</a>
+ <a class="drawer-link" href="terms.html"><span>📄</span> Terms & Conditions</a>
+ <a class="drawer-link" href="disclaimer.html"><span>⚖️</span> Disclaimer</a>
+</aside>
+
+<main class="wrap">
+ <div class="breaking"><strong>BREAKING</strong><span id="breakingText">DailySelibreti मा नवीनतम समाचार पढ्नुहोस्।</span></div>
+
+ <!-- सानो साइजको चिटिक्क परेको Ad Banner -->
+ <div class="main-top-ad">
+  <span class="ad-label">Advertisement</span>
+  <div class="ad-slot">[ Admob / AdSense Small Banner ]</div>
+ </div>
+
+ <section id="featured">
+  <div class="heading"><h2>TOP STORIES</h2></div><div class="state">Loading stories...</div>
+ </section>
+
+ <section id="shortcutSection">
+  <div class="heading"><h2>EXPLORE CATEGORIES</h2></div>
+  <div class="categories" id="categoryButtons"></div>
+ </section>
+
+ <section id="latestSection">
+  <div class="heading"><h2 id="latestTitle">LATEST NEWS</h2><a href="#" id="showAll">VIEW ALL →</a></div>
+  <div class="grid" id="newsGrid"></div>
+ </section>
+
+ <!-- बीचको सानो Ad Banner -->
+ <div class="feed-ad-banner">
+  <span class="ad-label">Advertisement</span>
+  <div class="ad-slot">[ Small In-Feed Ad Banner ]</div>
+ </div>
+
+ <section id="searchSection" class="hidden">
+  <div class="heading"><h2 id="searchTitle">SEARCH RESULTS</h2><a href="#" id="clearSearch">CLEAR ✕</a></div>
+  <div class="grid" id="searchGrid"></div>
+ </section>
+
+ <div id="categorySections"></div>
+</main>
+
+<footer class="footer"><div class="wrap">
+ <div class="footer-grid">
+  <div class="footer-about"><div class="footer-logo">Daily<span>Selibreti</span></div>
+   <p>चलचित्र, सेलिब्रेटी, स्वास्थ्य, राजनीति र विश्वका समाचार एउटै ठाउँमा।</p></div>
+  <div><h3>QUICK LINKS</h3><div class="footer-links">
+   <a href="index.html">Home</a><a href="about.html">About Us</a><a href="contact.html">Contact Us</a></div></div>
+  <div><h3>POLICIES</h3><div class="footer-links">
+   <a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms & Conditions</a><a href="disclaimer.html">Disclaimer</a></div></div>
+ </div>
+ <div class="copy">© <span id="year"></span> DailySelibreti. All Rights Reserved.</div>
+</div></footer>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {getFirestore,collection,getDocs} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
+ authDomain:"daily-selibreti.firebaseapp.com",
+ projectId:"daily-selibreti",
+ storageBucket:"daily-selibreti.firebasestorage.app",
+ messagingSenderId:"445067708773",
+ appId:"1:445067708773:web:526028f35a01c29b95f98c"
+};
+
+const cats=[
+ {name:"Hindi Movies",icon:"🎬"},
+ {name:"Hollywood Movies",icon:"🎥"},
+ {name:"Nepali Movies",icon:"🇳🇵"},
+ {name:"World History",icon:"🌍"},
+ {name:"Health Tips",icon:"💚"},
+ {name:"Political News",icon:"📰"},
+ {name:"Celebrity Lifestyle",icon:"⭐"}
+];
+
+const $=id=>document.getElementById(id);
+let posts=[];
+$("year").textContent=new Date().getFullYear();
+
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function category(p){return String(p.category||"Other").trim();}
+function title(p){return String(p.title||"Untitled News");}
+function desc(p){return String(p.excerpt||p.summary||p.description||"");}
+function pic(p){let s=String(p.imageUrl||p.image||"");return /^https?:\/\/[^\s"'<>]+$/i.test(s)?s:"";}
+function date(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new Date(v):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}):"DailySelibreti";}
+function link(p){return "read.html?id="+encodeURIComponent(p.id);}
+function image(p){return pic(p)?`<img src="${esc(pic(p))}" alt="${esc(title(p))}" loading="lazy">`:'<div style="height:180px;background:#eee;display:grid;place-items:center">📰</div>';}
+function card(p){return `<article class="card"><a class="card-img" href="${link(p)}">${image(p)}</a><div class="card-body"><div class="card-cat">${esc(category(p))}</div><h3><a href="${link(p)}">${esc(title(p))}</a></h3><div class="excerpt">${esc(desc(p))}</div><div class="meta">${esc(date(p))}</div><a class="read" href="${link(p)}">READ FULL STORY →</a></div></article>`;}
+function empty(s){return `<div class="state">${esc(s)}</div>`;}
+
+function buildCategories(){
+ $("categoryButtons").innerHTML=cats.map(c=>`<button class="cat" data-short="${esc(c.name)}"><span class="emoji">${c.icon}</span>${esc(c.name)}</button>`).join("");
+ $("categoryButtons").querySelectorAll("[data-short]").forEach(b=>b.onclick=()=>showCategory(b.dataset.short));
+}
+function featured(){
+ const a=posts[0],b=posts.slice(1,3);
+ if(!a){$("featured").innerHTML='<div class="heading"><h2>TOP STORIES</h2></div>'+empty("कुनै पनि समाचार प्रकाशित गरिएको छैन।");return;}
+ $("featured").innerHTML=`<div class="heading"><h2>TOP STORIES</h2></div><div class="hero-grid">
+ <a class="hero" href="${link(a)}">${image(a)}<div class="hero-copy"><span class="badge">${esc(category(a))}</span><h2>${esc(title(a))}</h2><small>${esc(date(a))} · Read full story →</small></div></a>
+ <div class="hero-side">${b.map(p=>`<a class="side-story" href="${link(p)}">${image(p)}<div class="side-copy"><span class="badge">${esc(category(p))}</span><h3>${esc(title(p))}</h3><div class="meta">${esc(date(p))}</div></div></a>`).join("")}</div></div>`;
+}
+function sections(){
+ $("categorySections").innerHTML=cats.map(c=>{let list=posts.filter(p=>category(p).toLowerCase()===c.name.toLowerCase());return `<section><div class="heading"><h2>${esc(c.name.toUpperCase())}</h2><a href="#" data-view="${esc(c.name)}">VIEW ALL →</a></div><div class="grid">${list.length?list.slice(0,4).map(card).join(""):empty("यस Category मा पोस्ट छैन।")}</div></section>`;}).join("");
+ $("categorySections").querySelectorAll("[data-view]").forEach(a=>a.onclick=e=>{e.preventDefault();showCategory(a.dataset.view);});
+}
+function setActive(name){
+ document.querySelectorAll("[data-cat]").forEach(a=>a.classList.toggle("active",(a.dataset.cat||"all").toLowerCase()===name.toLowerCase()));
+ document.querySelectorAll("[data-drawer]").forEach(a=>a.classList.toggle("active",(a.dataset.drawer||"all").toLowerCase()===name.toLowerCase()));
+}
+function closeMenu(){$("drawer").classList.remove("open");$("overlay").classList.remove("show");document.body.style.overflow="";}
+function home(){
+ $("featured").classList.remove("hidden");$("shortcutSection").classList.remove("hidden");$("latestSection").classList.remove("hidden");$("categorySections").classList.remove("hidden");$("searchSection").classList.add("hidden");
+ $("latestTitle").textContent="LATEST NEWS";$("newsGrid").innerHTML=posts.length?posts.slice(0,8).map(card).join(""):empty("समाचार उपलब्ध छैन।");
+ featured();sections();setActive("all");closeMenu();
+}
+function showCategory(name){
+ let list=posts.filter(p=>category(p).toLowerCase()===name.toLowerCase());
+ $("featured").classList.add("hidden");$("shortcutSection").classList.add("hidden");$("categorySections").classList.add("hidden");$("searchSection").classList.add("hidden");$("latestSection").classList.remove("hidden");
+ $("latestTitle").textContent=name.toUpperCase();$("newsGrid").innerHTML=list.length?list.map(card).join(""):empty("यस Category मा पोस्ट भेटिएन।");
+ setActive(name);closeMenu();window.scrollTo({top:0,behavior:"smooth"});
+}
+function search(q){
+ q=q.trim().toLowerCase();if(!q){home();return;}
+ let list=posts.filter(p=>[title(p),category(p),desc(p),p.content||p.body||""].join(" ").toLowerCase().includes(q));
+ $("featured").classList.add("hidden");$("shortcutSection").classList.add("hidden");$("latestSection").classList.add("hidden");$("categorySections").classList.add("hidden");$("searchSection").classList.remove("hidden");
+ $("searchTitle").textContent="SEARCH RESULTS ("+list.length+")";$("searchGrid").innerHTML=list.length?list.map(card).join(""):empty("खोजीसँग मिल्ने पोस्ट भेटिएन।");closeMenu();
+}
+$("openMenu").onclick=()=>{$("drawer").classList.add("open");$("overlay").classList.add("show");document.body.style.overflow="hidden";};
+$("closeMenu").onclick=closeMenu;$("overlay").onclick=closeMenu;
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu();});
+document.querySelectorAll("[data-cat]").forEach(a=>a.onclick=e=>{e.preventDefault();a.dataset.cat==="all"?home():showCategory(a.dataset.cat);});
+document.querySelectorAll("[data-drawer]").forEach(a=>a.onclick=()=>a.dataset.drawer==="all"?home():showCategory(a.dataset.drawer));
+$("searchForm").onsubmit=e=>{e.preventDefault();search($("searchInput").value);};
+$("searchInput").oninput=e=>{if(e.target.value.trim().length>=2)search(e.target.value);else if(!e.target.value.trim())home();};
+$("clearSearch").onclick=e=>{e.preventDefault();$("searchInput").value="";home();};
+$("showAll").onclick=e=>{e.preventDefault();home();};
+
+async function start(){
+ try{
+  const app=initializeApp(firebaseConfig),db=getFirestore(app);
+  const snap=await getDocs(collection(db,"news"));
+  posts=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim())).sort((a,b)=>{
+   const t=p=>{let v=p.createdAt||p.date;if(v?.toMillis)return v.toMillis();let n=new Date(v||0).getTime();return isNaN(n)?0:n;};return t(b)-t(a);
+  });
+ }catch(e){
+  console.error(e);
+  posts=[];
+ }
+ $("breakingText").textContent=posts.length?title(posts[0]):"DailySelibreti मा स्वागत छ।";
+ buildCategories();home();
+}
+buildCategories();start();
+</script>
+</body>
+</html>
