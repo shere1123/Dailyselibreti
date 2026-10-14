@@ -186,7 +186,7 @@ button{cursor:pointer}
  <!-- सानो साइजको चिटिक्क परेको Ad Banner -->
  <div class="main-top-ad">
   <span class="ad-label">Advertisement</span>
-  <div class="ad-slot">[ Admob / AdSense Small Banner ]</div>
+  <div class="ad-slot" id="headerAdSlot">[ Admob / AdSense Small Banner ]</div>
  </div>
 
  <section id="featured">
@@ -206,7 +206,7 @@ button{cursor:pointer}
  <!-- बीचको सानो Ad Banner -->
  <div class="feed-ad-banner">
   <span class="ad-label">Advertisement</span>
-  <div class="ad-slot">[ Small In-Feed Ad Banner ]</div>
+  <div class="ad-slot" id="inlineAdSlot">[ Small In-Feed Ad Banner ]</div>
  </div>
 
  <section id="searchSection" class="hidden">
@@ -231,7 +231,7 @@ button{cursor:pointer}
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import {getFirestore,collection,getDocs} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import {getFirestore,collection,getDocs,doc,getDoc} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
@@ -314,9 +314,43 @@ $("searchInput").oninput=e=>{if(e.target.value.trim().length>=2)search(e.target.
 $("clearSearch").onclick=e=>{e.preventDefault();$("searchInput").value="";home();};
 $("showAll").onclick=e=>{e.preventDefault();home();};
 
-async function start(){
+// Firestore बाट विज्ञापन (Ads) लोड र रेन्डर गर्ने फङ्सन
+async function loadAdsFromFirestore(db){
  try{
-  const app=initializeApp(firebaseConfig),db=getFirestore(app);
+  const snap=await getDoc(doc(db,"settings","ads"));
+  if(snap.exists()){
+   const data=snap.data();
+   
+   // Header Ad
+   if(data.header){
+    const headerSlot=$("headerAdSlot");
+    if(headerSlot){
+     headerSlot.innerHTML="";
+     const range=document.createRange();
+     range.selectNode(headerSlot);
+     headerSlot.appendChild(range.createContextualFragment(data.header));
+    }
+   }
+   
+   // Inline Ad
+   if(data.inline){
+    const inlineSlot=$("inlineAdSlot");
+    if(inlineSlot){
+     inlineSlot.innerHTML="";
+     const range=document.createRange();
+     range.selectNode(inlineSlot);
+     inlineSlot.appendChild(range.createContextualFragment(data.inline));
+    }
+   }
+  }
+ }catch(e){
+  console.error("Ads load error:", e);
+ }
+}
+
+async function start(){
+ const app=initializeApp(firebaseConfig),db=getFirestore(app);
+ try{
   const snap=await getDocs(collection(db,"news"));
   posts=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim())).sort((a,b)=>{
    const t=p=>{let v=p.createdAt||p.date;if(v?.toMillis)return v.toMillis();let n=new Date(v||0).getTime();return isNaN(n)?0:n;};return t(b)-t(a);
@@ -327,6 +361,9 @@ async function start(){
  }
  $("breakingText").textContent=posts.length?title(posts[0]):"DailySelibreti मा स्वागत छ।";
  buildCategories();home();
+ 
+ // विज्ञापन लोड गर्ने फङ्सन कल गरिएको
+ loadAdsFromFirestore(db);
 }
 buildCategories();start();
 </script>
