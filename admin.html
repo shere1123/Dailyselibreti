@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DailySelibreti Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#101010;--panel:#191919;--panel2:#222;
+  --red:#e50925;--text:#fff;--muted:#aaa;
+  --border:#333;--green:#20b66b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Mukta","Roboto",sans-serif;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.topbar{
+  height:64px;background:#181818;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;position:sticky;top:0;z-index:10;
+}
+.brand{font-weight:800;font-size:21px}
+.brand span{color:var(--red)}
+.layout{display:flex;min-height:calc(100vh - 64px)}
+.sidebar{
+  width:225px;background:#151515;border-right:1px solid var(--border);
+  padding:16px 10px;flex-shrink:0;
+}
+.nav{
+  display:block;width:100%;text-align:left;padding:12px;
+  border:0;border-radius:8px;background:transparent;color:#ddd;
+  margin:4px 0;font-weight:600;
+}
+.nav:hover,.nav.active{background:var(--red);color:#fff}
+.main{padding:22px;width:100%;min-width:0;max-width:1500px;margin:auto}
+h1{font-size:25px;margin:0 0 8px}
+h2{font-size:20px;margin:0 0 16px}
+.sub{color:var(--muted);margin-bottom:22px}
+.stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;margin:18px 0;
+}
+.stat,.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:12px;padding:17px;margin-bottom:16px;
+}
+.stat small{color:var(--muted)}
+.stat strong{display:block;font-size:28px;margin-top:7px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{margin-bottom:14px;min-width:0}
+.field label{display:block;font-weight:700;margin-bottom:5px}
+input,textarea,select{
+  width:100%;background:#101010;color:white;border:1px solid #444;
+  border-radius:8px;padding:11px 12px;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--red)}
+textarea{min-height:110px;resize:vertical}
+.full{grid-column:1/-1}
+.btn{
+  background:var(--red);border:0;color:#fff;border-radius:8px;
+  padding:10px 15px;font-weight:700;margin:3px 3px 3px 0;
+}
+.btn.secondary{background:#333}
+.btn.green{background:#167c4a}
+.btn.danger{background:#9e1628}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{text-align:left;padding:11px;border-bottom:1px solid var(--border)}
+th{color:#ddd;background:#202020}
+td{color:#eee}
+.thumb{width:62px;height:45px;object-fit:cover;border-radius:5px}
+.badge{background:#303030;padding:4px 8px;border-radius:6px;font-size:12px}
+.hidden{display:none!important}
+.msg{margin:12px 0;color:#ffb8b8;white-space:pre-wrap}
+.preview{max-width:240px;max-height:150px;object-fit:contain;display:block;margin-top:8px}
+@media(max-width:850px){
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sidebar{width:190px}
+ .main{padding:14px}
+}
+@media(max-width:600px){
+ .topbar{height:58px;padding:0 12px}
+ .brand{font-size:18px}
+ .layout{display:block}
+ .sidebar{
+   width:100%;display:flex;gap:5px;overflow-x:auto;
+   padding:8px;border-right:0;border-bottom:1px solid var(--border)
+ }
+ .nav{width:auto;white-space:nowrap;padding:9px 12px;margin:0}
+ .formgrid{grid-template-columns:1fr}
+ .full{grid-column:auto}
+ .main{padding:12px}
+}
+</style>
+</head>
+
+<body>
+<header class="topbar">
+  <div class="brand">Daily<span>Selibreti</span> <small style="font-size:12px;color:#aaa">ADMIN</small></div>
+  <button id="logoutBtn" class="btn secondary hidden">Logout</button>
+</header>
+
+<section id="loginScreen" class="loginwrap" style="max-width:420px;margin:9vh auto;padding:20px">
+  <div class="card">
+    <h1>Admin Login</h1>
+    <p class="sub">DailySelibreti व्यवस्थापन प्यानल</p>
+    <form id="loginForm">
+      <div class="field">
+        <label>Email</label>
+        <input id="email" type="email" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn" style="width:100%" type="submit">Login गर्नुहोस्</button>
+      <div id="loginMsg" class="msg"></div>
+    </form>
+  </div>
+</section>
+
+<div id="adminApp" class="layout hidden">
+  <aside class="sidebar">
+    <button class="nav active" data-page="dashboard">📊 Dashboard</button>
+    <button class="nav" data-page="news">📰 समाचार</button>
+    <button class="nav" data-page="editor">✍️ समाचार लेख्नुहोस्</button>
+  </aside>
+
+  <main class="main">
+    <section id="page-dashboard">
+      <h1>Dashboard</h1>
+      <p class="sub">तपाईंको वेबसाइटको अवस्था</p>
+      <div class="stats">
+        <div class="stat"><small>कुल समाचार</small><strong id="totalNews">0</strong></div>
+        <div class="stat"><small>प्रकाशित</small><strong id="publishedNews">0</strong></div>
+        <div class="stat"><small>ड्राफ्ट</small><strong id="draftNews">0</strong></div>
+        <div class="stat"><small>कुल देखिएका Views</small><strong id="totalViews">0</strong></div>
+      </div>
+      <div class="card">
+        <h2>छिटो काम</h2>
+        <button class="btn" data-goto="editor">+ नयाँ समाचार</button>
+        <button class="btn secondary" data-goto="news">समाचार व्यवस्थापन</button>
+      </div>
+    </section>
+
+    <section id="page-news" class="hidden">
+      <h1>समाचार व्यवस्थापन</h1>
+      <p class="sub">समाचार सम्पादन, प्रकाशित वा हटाउनुहोस्।</p>
+      <div class="card">
+        <input id="newsSearch" placeholder="शीर्षक वा Category खोज्नुहोस्...">
+      </div>
+      <div class="card tablewrap">
+        <table>
+          <thead><tr><th>फोटो</th><th>शीर्षक</th><th>Category</th><th>Status</th><th>Views</th><th>कार्य</th></tr></thead>
+          <tbody id="newsRows"><tr><td colspan="6">समाचार लोड हुँदैछ...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="page-editor" class="hidden">
+      <h1 id="editorHeading">नयाँ समाचार लेख्नुहोस्</h1>
+      <p class="sub">समाचार लेख्नुहोस् र बीचमा फोटो राख्न `[PHOTO: इमेजको URL]` प्रयोग गर्नुहोस्।</p>
+      <form id="newsForm" class="card">
+        <input type="hidden" id="editId">
+        <div class="formgrid">
+          <div class="field full">
+            <label>समाचार शीर्षक *</label>
+            <input id="newsTitle" required maxlength="250">
+          </div>
+          <div class="field">
+            <label>Category *</label>
+            <select id="newsCategory" required>
+              <option value="Hindi Movies">Hindi Movies</option>
+              <option value="Hollywood Movies">Hollywood Movies</option>
+              <option value="Nepali Movies">Nepali Movies</option>
+              <option value="World History">World History</option>
+              <option value="Health Tips">Health Tips</option>
+              <option value="Political News">Political News</option>
+              <option value="Celebrity Lifestyle">Celebrity Lifestyle</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>प्रकाशन स्थिति</label>
+            <select id="newsStatus">
+              <option value="published">प्रकाशित</option>
+              <option value="draft">ड्राफ्ट</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>मुख्य थम्बनेल फोटो URL *</label>
+            <input id="newsImage" type="url" placeholder="https://example.com/photo.jpg" required>
+            <img id="imagePreview" class="preview hidden" alt="Image preview">
+          </div>
+          <div class="field full">
+            <label>छोटो विवरण</label>
+            <textarea id="newsExcerpt" maxlength="1000" placeholder="समाचारको छोटो परिचय..."></textarea>
+          </div>
+          <div class="field full">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <label style="margin:0">समाचारको पूरा सामग्री *</label>
+              <button type="button" class="btn secondary" id="insertPhotoBtn" style="padding:4px 10px;font-size:12px;">📸 फोटो राख्नुहोस् (`[PHOTO: URL]` थप्नुहोस्)</button>
+            </div>
+            <textarea id="newsContent" required style="min-height:280px" placeholder="पहिलो प्याराफ्रेज लेख्नुहोस्...
+
+[PHOTO: https://example.com/image2.jpg]
+
+अर्को प्याराफ्रेज यहाँ लेख्नुहोस्..."></textarea>
+            <small style="color:#aaa">टिप्पणी: टेक्स्टको बीचमा फोटो राख्न चाहनुहुन्छ भने <code>[PHOTO: फोटोको-लिंक]</code> टाइप गर्नुहोस् वा माथिको बटन थिच्नुहोस्।</small>
+          </div>
+        </div>
+        <button class="btn" type="submit">Save गर्नुहोस्</button>
+        <button class="btn secondary" type="button" id="resetNews">नयाँ लेख</button>
+        <div id="newsMsg" class="msg"></div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
+  authDomain: "daily-selibreti.firebaseapp.com",
+  projectId: "daily-selibreti",
+  storageBucket: "daily-selibreti.firebasestorage.app",
+  messagingSenderId: "445067708773",
+  appId: "1:445067708773:web:526028f35a01c29b95f98c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let allNews = [];
+let loading = false;
+
+function message(id, text, ok=false) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = ok ? "#71e3a8" : "#ffb8b8";
+}
+function safeText(value) {
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+}
+function validHttpUrl(value) {
+  if (!value) return "";
+  try {
+    const u = new URL(value);
+    return ["http:","https:"].includes(u.protocol) ? u.href : "";
+  } catch { return ""; }
+}
+function showPage(name) {
+  document.querySelectorAll("main > section").forEach(s => s.classList.add("hidden"));
+  $("page-" + name)?.classList.remove("hidden");
+  document.querySelectorAll(".nav").forEach(b => b.classList.toggle("active", b.dataset.page === name));
+  if (name === "news" || name === "dashboard") loadNews();
+}
+document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
+document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  message("loginMsg", "Login हुँदैछ...");
+  try {
+    await signInWithEmailAndPassword(auth, $("email").value.trim(), $("password").value);
+  } catch (err) {
+    message("loginMsg", "Login असफल: " + (err.code || err.message));
+  }
+});
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if (!user) {
+    $("loginScreen").classList.remove("hidden");
+    $("adminApp").classList.add("hidden");
+    $("logoutBtn").classList.add("hidden");
+    return;
+  }
+  try {
+    const adminSnap = await getDoc(doc(db, "admins", user.uid));
+    if (!adminSnap.exists()) {
+      await signOut(auth);
+      message("loginMsg", "यो account लाई Admin अनुमति छैन।");
+      return;
+    }
+    $("loginScreen").classList.add("hidden");
+    $("adminApp").classList.remove("hidden");
+    $("logoutBtn").classList.remove("hidden");
+    await loadNews();
+  } catch (err) {
+    await signOut(auth);
+    message("loginMsg", "Admin जाँच हुन सकेन: " + err.message);
+  }
+});
+
+$("logoutBtn").addEventListener("click", () => signOut(auth));
+
+async function loadNews() {
+  if (!currentUser || loading) return;
+  loading = true;
+  try {
+    const snap = await getDocs(collection(db, "news"));
+    allNews = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    allNews.sort((a,b) => {
+      const at = a.createdAt?.toMillis?.() || 0;
+      const bt = b.createdAt?.toMillis?.() || 0;
+      return bt - at;
+    });
+    $("totalNews").textContent = allNews.length;
+    $("publishedNews").textContent = allNews.filter(n => ["published","publish"].includes(n.status)).length;
+    $("draftNews").textContent = allNews.filter(n => n.status === "draft").length;
+    $("totalViews").textContent = allNews.reduce((sum,n) => sum + (Number(n.views)||0), 0).toLocaleString();
+    renderNewsRows();
+  } catch (err) {
+    $("newsRows").innerHTML = `<tr><td colspan="6">समाचार लोड भएन: ${safeText(err.message)}</td></tr>`;
+  } finally {
+    loading = false;
+  }
+}
+
+function renderNewsRows() {
+  const term = $("newsSearch").value.trim().toLowerCase();
+  const list = allNews.filter(n =>
+    String(n.title||"").toLowerCase().includes(term) ||
+    String(n.category||"").toLowerCase().includes(term)
+  );
+  if (!list.length) {
+    $("newsRows").innerHTML = '<tr><td colspan="6">समाचार भेटिएन।</td></tr>';
+    return;
+  }
+  $("newsRows").innerHTML = list.map(n => {
+    const img = validHttpUrl(n.imageUrl || n.image);
+    return `<tr>
+      <td>${img ? `<img class="thumb" src="${safeText(img)}" alt="">` : "—"}</td>
+      <td>${safeText(n.title || "शीर्षक छैन")}</td>
+      <td>${safeText(n.category || "—")}</td>
+      <td><span class="badge">${safeText(n.status || "draft")}</span></td>
+      <td>${Number(n.views)||0}</td>
+      <td>
+        <button class="btn secondary" data-edit="${safeText(n.id)}">Edit</button>
+        <button class="btn danger" data-delete="${safeText(n.id)}">Delete</button>
+      </td>
+    </tr>`;
+  }).join("");
+
+  document.querySelectorAll("[data-edit]").forEach(b =>
+    b.addEventListener("click", () => editNews(b.dataset.edit)));
+  document.querySelectorAll("[data-delete]").forEach(b =>
+    b.addEventListener("click", () => removeNews(b.dataset.delete)));
+}
+$("newsSearch").addEventListener("input", renderNewsRows);
+
+function resetNewsForm() {
+  $("newsForm").reset();
+  $("editId").value = "";
+  $("editorHeading").textContent = "नयाँ समाचार लेख्नुहोस्";
+  $("imagePreview").classList.add("hidden");
+  message("newsMsg", "");
+}
+$("resetNews").addEventListener("click", resetNewsForm);
+
+$("newsImage").addEventListener("input", () => {
+  const url = validHttpUrl($("newsImage").value.trim());
+  if (url) {
+    $("imagePreview").src = url;
+    $("imagePreview").classList.remove("hidden");
+  } else {
+    $("imagePreview").classList.add("hidden");
+  }
+});
+
+// Shortcut button to insert [PHOTO: URL]
+$("insertPhotoBtn").addEventListener("click", () => {
+  const textarea = $("newsContent");
+  const tag = "\n\n[PHOTO: https://example.com/image.jpg]\n\n";
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  textarea.value = textarea.value.substring(0, start) + tag + textarea.value.substring(end);
+  textarea.focus();
+  textarea.setSelectionRange(start + 8, start + 37); // Select placeholder URL for easy replacement
+});
+
+function editNews(id) {
+  const n = allNews.find(item => item.id === id);
+  if (!n) return;
+  $("editId").value = id;
+  $("newsTitle").value = n.title || "";
+  $("newsCategory").value = n.category || "Hollywood Movies";
+  $("newsStatus").value = n.status === "published" || n.status === "publish" ? "published" : "draft";
+  $("newsImage").value = n.imageUrl || n.image || "";
+  $("newsExcerpt").value = n.excerpt || n.summary || "";
+  $("newsContent").value = n.content || "";
+  $("editorHeading").textContent = "समाचार सम्पादन";
+  const url = validHttpUrl($("newsImage").value);
+  if (url) {
+    $("imagePreview").src = url;
+    $("imagePreview").classList.remove("hidden");
+  }
+  showPage("editor");
+}
+async function removeNews(id) {
+  const n = allNews.find(item => item.id === id);
+  if (!n || !confirm("यो समाचार स्थायी रूपमा हटाउने हो?")) return;
+  try {
+    await deleteDoc(doc(db, "news", id));
+    await loadNews();
+  } catch (err) {
+    alert("हटाउन सकिएन: " + err.message);
+  }
+}
+
+$("newsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser) return;
+  const title = $("newsTitle").value.trim();
+  const imageUrl = validHttpUrl($("newsImage").value.trim());
+  const content = $("newsContent").value.trim();
+  if (!title || !imageUrl || !content) {
+    message("newsMsg", "शीर्षक, सही फोटो URL र समाचार सामग्री आवश्यक छ।");
+    return;
+  }
+  const id = $("editId").value;
+  const data = {
+    title,
+    category: $("newsCategory").value,
+    status: $("newsStatus").value,
+    imageUrl,
+    excerpt: $("newsExcerpt").value.trim(),
+    summary: $("newsExcerpt").value.trim(),
+    content,
+    updatedAt: serverTimestamp()
+  };
+  try {
+    if (id) {
+      await updateDoc(doc(db, "news", id), data);
+    } else {
+      data.createdAt = serverTimestamp();
+      data.date = new Date().toISOString();
+      data.views = 0;
+      await addDoc(collection(db, "news"), data);
+    }
+    message("newsMsg", "समाचार Save भयो।", true);
+    resetNewsForm();
+    await loadNews();
+    showPage("news");
+  } catch (err) {
+    message("newsMsg", "Save हुन सकेन: " + err.message);
+  }
+});
+</script>
+</body>
+</html>
