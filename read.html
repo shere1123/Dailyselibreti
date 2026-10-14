@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>Read News | DailySelibreti</title>
+
+<!-- Dynamic Open Graph Meta Tags -->
+<meta property="og:type" content="article">
+<meta property="og:title" id="ogTitle" content="DailySelibreti News">
+<meta property="og:description" id="ogDesc" content="ताजा समाचार र मनोरञ्जनका खबरहरू">
+<meta property="og:image" id="ogImage" content="">
+<meta property="og:url" id="ogUrl" content="">
+
+<!-- Google Nepali News Fonts (Mukta & Noto Sans Devanagari) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{--red:#e50925;--dark:#151515;--text:#222222;--muted:#666;--line:#eee}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  padding:0;
+  background:#ffffff;
+  color:var(--text);
+  font-family:'Mukta', 'Noto Sans Devanagari', sans-serif;
+  line-height:1.85;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+a{text-decoration:none;color:inherit}
+.wrap{width:100%;max-width:1120px;margin:auto;padding:0 16px}
+
+/* Header Section */
+.header{background:#111;color:white;border-bottom:4px solid var(--red)}
+.header-inner{min-height:65px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:38px;height:38px;background:var(--red);border-radius:8px;display:grid;place-items:center;font:900 19px sans-serif;color:#fff}
+.brand-title{font:900 23px sans-serif}.brand-title span{color:#ff4056}
+.back{font-size:13px;background:#2b2b2b;color:white;border:1px solid #454545;border-radius:4px;padding:6px 12px}
+
+.breadcrumb{font-size:14px;color:#777;margin:15px 0 10px}
+.breadcrumb a{color:var(--red);font-weight:600}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:30px;align-items:start}
+
+/* Article Area */
+.article{
+  background:#ffffff;
+  padding:0;
+  margin-bottom:30px;
+}
+
+/* Compact Small Banner Ad Styling Below Label */
+.top-ad-banner{
+  margin:10px 0 16px;
+  background:#fff;
+  border:1px dashed #d0d0d0;
+  border-radius:4px;
+  padding:6px 10px;
+  text-align:center;
+}
+.ad-label{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:3px;display:block;}
+.top-ad-banner .ad-slot{font-size:12px;color:#555;font-weight:600;min-height:48px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;border-radius:3px;}
+
+.label{
+  display:inline-block;
+  background:var(--red);
+  color:white;
+  padding:4px 12px;
+  font-size:13px;
+  font-weight:800;
+  border-radius:2px;
+  text-transform:uppercase;
+}
+
+/* Main Title Styling */
+h1{
+  font-size:clamp(26px, 5.5vw, 38px);
+  line-height:1.35;
+  margin:16px 0 14px;
+  font-weight:800;
+  color:#000000;
+  letter-spacing:-0.2px;
+}
+
+/* Meta Data Info */
+.meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  color:#555;
+  font-size:15px;
+  font-weight:600;
+  padding-bottom:14px;
+  margin-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.meta-item{display:inline-flex;align-items:center;gap:5px}
+
+/* Full Bleed Cover Photo */
+.cover-container{
+  width:100vw;
+  position:relative;
+  left:50%;
+  right:50%;
+  margin-left:-50vw;
+  margin-right:-50vw;
+  margin-top:15px;
+  margin-bottom:10px;
+  background:#111;
+}
+.cover{
+  width:100%;
+  max-height:550px;
+  object-fit:cover;
+  display:block;
+}
+.caption{font-size:14px;color:#777;margin-bottom:22px;text-align:center;font-style:italic;padding:0 15px}
+
+/* Article Content & Typography */
+.content{
+  font-family: 'Mukta', 'Noto Sans Devanagari', sans-serif;
+  font-size: 21px;
+  font-weight: 500;
+  line-height: 1.85;
+  color: #222222;
+  text-align: justify;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+.content p{
+  margin-bottom: 24px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+/* In-Article Custom Embedded Image Styling (टेक्स्टको बीचमा राख्ने फोटोको डिजाइन) */
+.article-inline-img-wrap {
+  margin: 25px 0;
+  text-align: center;
+}
+.article-inline-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+.article-inline-caption {
+  font-size: 13px;
+  color: #777;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.content h2,.content h3{
+  font-size: 25px;
+  line-height: 1.4;
+  margin-top: 32px;
+  margin-bottom: 14px;
+  font-weight: 800;
+  color: #000;
+  text-align: left;
+}
+.content a{color:var(--red);text-decoration:underline}
+
+/* Automatic In-Article Banner Ad Slot (50, 100, 150 Words) */
+.auto-ad-banner{
+  margin:28px 0;
+  padding:10px 14px;
+  background:#fafafa;
+  border:1px dashed #cccccc;
+  border-radius:6px;
+  text-align:center;
+}
+.ad-tag{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:1px;display:block;margin-bottom:5px}
+.auto-ad-banner .ad-slot{min-height:75px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px;font-weight:bold;border-radius:4px}
+
+/* Share Buttons */
+.share-section{border-top:1px solid var(--line);padding-top:22px;margin-top:35px}
+.share-title{font-size:16px;font-weight:700;margin-bottom:14px;color:#222}
+.share-buttons{display:flex;flex-wrap:wrap;gap:10px}
+.share-btn{
+  border:0;
+  color:white;
+  border-radius:6px;
+  padding:11px 18px;
+  font-size:14px;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+}
+.share-btn svg{width:18px;height:18px;fill:currentColor}
+.btn-fb{background:#1877f2}
+.btn-tw{background:#000000}
+.btn-wa{background:#25d366}
+.btn-tg{background:#24A1DE}
+.btn-copy{background:#444}
+
+/* Custom Toast Notification */
+.toast-msg {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #111111;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  z-index: 9999;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast-msg.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Sidebar & Related */
+.sidebar{background:#fff;border-top:2px solid var(--red);padding-top:15px}
+.sidebar h2{font-size:20px;margin:0 0 18px;padding-bottom:8px;border-bottom:1px solid var(--line);font-weight:800}
+.related{display:flex;gap:12px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.related img{width:100px;height:75px;object-fit:cover;background:#eee;border-radius:4px}
+.related h3{font-size:15px;line-height:1.4;margin:0;font-weight:700}
+.related a:hover{color:var(--red)}
+.related small{font-size:12px;color:#888}
+
+.footer{background:#111;color:#bbb;text-align:center;padding:25px 10px;margin-top:40px;font-size:13px}
+.state{background:#fff;padding:40px;text-align:center;color:#666;font-size:16px}
+
+@media(max-width:800px){
+  .wrap{width:100%;padding:0 15px}
+  .layout{grid-template-columns:1fr;gap:20px}
+  .content{font-size:20px;line-height:1.8}
+  .share-buttons{display:grid;grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <div class="logo">DS</div>
+      <div class="brand-title">Daily<span>Selibreti</span></div>
+    </a>
+    <a class="back" href="index.html">← Back</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="breadcrumb"><a href="index.html">Home</a> / <span id="crumb">News</span></div>
+  <div id="pageState" class="state">समाचार लोड हुँदैछ...</div>
+  
+  <div class="layout" id="layout" hidden>
+    <article class="article">
+      <span class="label" id="category">NEWS</span>
+      
+      <!-- Top Small Ad Banner -->
+      <div class="top-ad-banner">
+        <span class="ad-label">Advertisement</span>
+        <div class="ad-slot">[ Small Top Ad Banner Area ]</div>
+      </div>
+
+      <!-- Main Topic / Title -->
+      <h1 id="title"></h1>
+      
+      <!-- Article Metadata -->
+      <div class="meta">
+        <span class="meta-item" id="date"></span>
+        <span>•</span>
+        <span class="meta-item">DailySelibreti Editorial</span>
+        <span>•</span>
+        <span class="meta-item" id="viewsContainer">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          <span id="viewsCount">0</span> पल्ट पढिएको
+        </span>
+      </div>
+
+      <!-- Cover Image -->
+      <div class="cover-container" id="coverWrap">
+        <img id="cover" class="cover" alt="">
+      </div>
+      <div class="caption" id="caption"></div>
+
+      <!-- Main Article Content -->
+      <div class="content" id="content"></div>
+
+      <!-- Social Media Share Buttons -->
+      <div class="share-section">
+        <div class="share-title">यो समाचार शेयर गर्नुहोस्:</div>
+        <div class="share-buttons">
+          <button class="share-btn btn-fb" id="shareFb">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </button>
+
+          <button class="share-btn btn-tw" id="shareTw">
+            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Twitter (X)
+          </button>
+
+          <button class="share-btn btn-wa" id="shareWa">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            WhatsApp
+          </button>
+
+          <button class="share-btn btn-tg" id="shareTg">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.321.016.111.033.351.017.545z"/></svg>
+            Telegram
+          </button>
+
+          <button class="share-btn btn-copy" id="copyBtn">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copy Link
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <aside class="sidebar">
+      <h2>RELATED NEWS</h2>
+      <div id="related"></div>
+    </aside>
+  </div>
+</main>
+
+<!-- Custom Toast Container -->
+<div id="toast" class="toast-msg">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  <span id="toastText">समाचारको लिंक Copy गरियो!</span>
+</div>
+
+<footer class="footer">
+  © <span id="year"></span> DailySelibreti. All Rights Reserved.
+</footer>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
+ authDomain:"daily-selibreti.firebaseapp.com",
+ projectId:"daily-selibreti",
+ storageBucket:"daily-selibreti.firebasestorage.app",
+ messagingSenderId:"445067708773",
+ appId:"1:445067708773:web:526028f35a01c29b95f98c"
+};
+
+const $=id=>document.getElementById(id);$("year").textContent=new Date().getFullYear();
+
+function showToast(text="समाचारको लिंक Copy गरियो!"){
+  const toast = $("toast");
+  $("toastText").textContent = text;
+  toast.classList.add("show");
+  setTimeout(() => { toast.classList.remove("show"); }, 3000);
+}
+
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function safeImage(p){const u=String(p.imageUrl||p.image||"");return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:"";}
+function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new Date(v):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}):"DailySelibreti";}
+
+// Smart Formatter: Handles Paragraphs, Ads (Every 50 words), and Embedded [PHOTO: URL] Tags
+function renderTextWithAdsAndPhotos(text){
+  const cleanStr = String(text||"").trim();
+  if(!cleanStr) return "";
+
+  // Split content by paragraphs or lines
+  const lines = cleanStr.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  
+  let accumulatedWords = 0;
+  let nextAdThreshold = 50; 
+  let htmlOutput = "";
+
+  const adBannerHTML = `
+    <div class="auto-ad-banner">
+      <span class="ad-tag">Advertisement / विज्ञापन</span>
+      <div class="ad-slot">[ In-Article Responsive Banner Ad ]</div>
+    </div>
+  `;
+
+  lines.forEach((line) => {
+    // Check if line is an embedded photo tag like [PHOTO: https://...]
+    const photoMatch = line.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
+    
+    if (photoMatch) {
+      const imgUrl = photoMatch[1];
+      htmlOutput += `
+        <div class="article-inline-img-wrap">
+          <img class="article-inline-img" src="${esc(imgUrl)}" alt="Article Photo" loading="lazy">
+          <div class="article-inline-caption">तस्वीर: DailySelibreti</div>
+        </div>
+      `;
+    } else {
+      const wordsInLine = line.split(/\s+/).filter(Boolean).length;
+      accumulatedWords += wordsInLine;
+
+      htmlOutput += `<p>${esc(line)}</p>`;
+
+      if (accumulatedWords >= nextAdThreshold) {
+        htmlOutput += adBannerHTML;
+        nextAdThreshold += 50; 
+      }
+    }
+  });
+
+  return htmlOutput;
+}
+
+function articleLink(p){return "read.html?"+(p.demo?"demo=1&":"")+"id="+encodeURIComponent(p.id);}
+function relatedCard(p){return `<div class="related"><a href="${articleLink(p)}">${safeImage(p)?`<img src="${esc(safeImage(p))}" alt="">`:""}</a><div><h3><a href="${articleLink(p)}">${esc(p.title||"News")}</a></h3><small>${esc(p.category||"News")}</small></div></div>`;}
+
+function updateMetaTags(post, url){
+  const title = post.title || "DailySelibreti";
+  const desc = post.excerpt || post.summary || "DailySelibreti News Update";
+  const img = safeImage(post);
+
+  document.title = title + " | DailySelibreti";
+  $("ogTitle").setAttribute("content", title);
+  $("ogDesc").setAttribute("content", desc);
+  $("ogUrl").setAttribute("content", url);
+  if(img) $("ogImage").setAttribute("content", img);
+}
+
+async function load(){
+ const params=new URLSearchParams(location.search);
+ const id=params.get("id");
+ if(!id){$("pageState").textContent="समाचार ID भेटिएन। Home पेजमा फर्कनुहोस्।";return;}
+
+ let post=null,all=[];
+ try{
+   const app=initializeApp(firebaseConfig),db=getFirestore(app);
+   const docRef = doc(db,"news",id);
+   const snap=await getDoc(docRef);
+   
+   if(snap.exists()){
+    const p={id:snap.id,...snap.data()};
+    if(["published","publish"].includes(String(p.status||"").toLowerCase().trim())){
+      post=p;
+      try {
+        await updateDoc(docRef, { views: increment(1) });
+        post.views = (post.views || 0) + 1;
+      } catch(e) { post.views = (post.views || 0) + 1; }
+    }
+   }
+   const list=await getDocs(collection(db,"news"));
+   all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
+ }catch(e){console.error(e);}
+
+ if(!post){$("pageState").textContent="यो समाचार भेटिएन वा प्रकाशित गरिएको छैन। Home मा फर्केर अर्को समाचार खोल्नुहोस्।";return;}
+
+ updateMetaTags(post, location.href);
+
+ $("pageState").hidden=true;$("layout").hidden=false;
+ $("title").textContent=post.title||"News";
+ $("category").textContent=post.category||"NEWS";
+ $("crumb").textContent=post.category||"News";
+ $("date").textContent=safeDate(post);
+ $("caption").textContent=post.imageCaption||post.imageCredit||"";
+ $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
+
+ const src=safeImage(post);
+ if(src){
+   $("cover").src=src;
+   $("cover").alt=post.title||"News";
+ } else {
+   $("coverWrap").hidden=true;
+ }
+
+ const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
+ 
+ $("content").innerHTML=renderTextWithAdsAndPhotos(raw);
+ $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
+
+ const currentUrl = encodeURIComponent(location.href);
+ const shareText = encodeURIComponent(post.title || "");
+
+ $("shareFb").onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`, '_blank');
+ $("shareTw").onclick = () => window.open(`https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareText}`, '_blank');
+ $("shareWa").onclick = () => window.open(`https://api.whatsapp.com/send?text=${shareText}%20${currentUrl}`, '_blank');
+ $("shareTg").onclick = () => window.open(`https://t.me/share/url?url=${currentUrl}&text=${shareText}`, '_blank');
+
+ $("copyBtn").onclick=async()=>{
+  try{
+    await navigator.clipboard.writeText(location.href);
+    showToast("समाचारको लिंक Copy गरियो!");
+  } catch(e){
+    showToast("लिंक Copy गर्न सकिएन!");
+  }
+ };
+}
+
+load();
+</script>
+</body>
+</html>
