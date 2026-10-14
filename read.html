@@ -104,7 +104,7 @@ h1{
 }
 .meta-item{display:inline-flex;align-items:center;gap:5px}
 
-/* Full Bleed Cover Photo */
+/* Full Bleed Cover Photo (Main Thumbnail) */
 .cover-container{
   width:100vw;
   position:relative;
@@ -141,24 +141,26 @@ h1{
   letter-spacing: 0.1px;
 }
 
-/* In-Article Custom Embedded Image Styling */
+/* In-Article Photos - Full Screen Width Like Cover Photo */
 .article-inline-img-wrap {
-  margin: 25px 0;
-  text-align: center;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  background: #111;
 }
-.article-inline-img {
-  width: 100%;
-  max-height: 480px;
-  object-fit: cover;
-  border-radius: 6px;
-  display: block;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
-.article-inline-caption {
-  font-size: 13px;
-  color: #777;
-  margin-top: 6px;
-  font-style: italic;
+.article-inline-img-wrap img {
+  width: 100% !important;
+  max-height: 550px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
 }
 
 .content h2,.content h3{
@@ -392,45 +394,58 @@ function executeScriptTags(container) {
   });
 }
 
-// Smart Formatter: सुरुको ७० शब्दमा एडसेन्स (adSense70) र त्यसपछि क्रमशः ७०-७० शब्दको अन्तरालमा कम्पनीका विज्ञापनहरू
 function renderTextWithAdsAndPhotos(text){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
-  const lines = cleanStr.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  // <img ...> ट्याग वा नयाँ लाइनहरू विभाजन गर्ने
+  const blocks = cleanStr.split(/(<img[^>]*>|\n+)/i).map(b => b.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
-  let nextAdThreshold = 70; // पहिलो विज्ञापन ७० शब्दमा
-  let adSequenceIndex = 0;   // पालो ट्र्याक गर्ने काउन्टर
+  let nextAdThreshold = 70;
+  let adSequenceIndex = 0;
   let htmlOutput = "";
 
-  // एडमिन प्यानलको नयाँ adSense70 बक्स र कम्पनीका विज्ञापनहरू तान्ने
   const adAdSense = (globalAds && globalAds.adSense70) ? globalAds.adSense70 : ''; 
   const adCompanyA = (globalAds && globalAds.companyA) ? globalAds.companyA : '';
   const adCompanyB = (globalAds && globalAds.companyB) ? globalAds.companyB : '';
   const adCompanyC = (globalAds && globalAds.companyC) ? globalAds.companyC : '';
 
-  // विज्ञापनहरूको निश्चित क्रम: AdSense (adSense70) ➔ Company A ➔ Company B ➔ Company C
   const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
-  lines.forEach((line) => {
-    const photoMatch = line.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
-    
+  blocks.forEach((block) => {
+    // १. यदि एडमिन प्यानलबाट हालिएको <img> ट्याग हो भने (Full screen Container भित्र राख्ने)
+    if (/^<img[^>]*>$/i.test(block)) {
+      htmlOutput += `
+        <div class="article-inline-img-wrap">
+          ${block}
+        </div>
+      `;
+      return;
+    }
+
+    // २. यदि पुरानो [PHOTO: URL] ढाँचा हो भने
+    const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     if (photoMatch) {
       const imgUrl = photoMatch[1];
       htmlOutput += `
         <div class="article-inline-img-wrap">
           <img class="article-inline-img" src="${esc(imgUrl)}" alt="Article Photo" loading="lazy">
-          <div class="article-inline-caption">तस्वीर: DailySelibreti</div>
         </div>
       `;
-    } else {
+      return;
+    }
+
+    // ३. साधारण टेक्स्ट र विज्ञापन मिलाउने
+    const lines = block.split(/\n+/);
+    lines.forEach(line => {
+      if(!line.trim()) return;
+
       const wordsInLine = line.split(/\s+/).filter(Boolean).length;
       accumulatedWords += wordsInLine;
 
       htmlOutput += `<p>${esc(line)}</p>`;
 
-      // शब्द संख्या ७० पुगेपछि वा पार गरेपछि विज्ञापन इन्सर्ट गर्ने
       if (accumulatedWords >= nextAdThreshold && sequenceAds.length > 0) {
         const currentAd = sequenceAds[adSequenceIndex % sequenceAds.length];
 
@@ -444,9 +459,9 @@ function renderTextWithAdsAndPhotos(text){
         }
 
         adSequenceIndex++;
-        nextAdThreshold += 70; // त्यसपछि फेरि हरेक ७० शब्दको अन्तरालमा अर्को विज्ञापन
+        nextAdThreshold += 70;
       }
-    }
+    });
   });
 
   return htmlOutput;
@@ -539,7 +554,9 @@ async function load(){
 
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
- const currentUrl = encodeURIComponent(location.href);
+ // शेयर लिङ्कको लागि ठ्याक्कै यो समाचारको फुल URL
+ const postFullUrl = window.location.origin + window.location.pathname + "?id=" + encodeURIComponent(post.id);
+ const currentUrl = encodeURIComponent(postFullUrl);
  const shareText = encodeURIComponent(post.title || "");
 
  $("shareFb").onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`, '_blank');
@@ -549,7 +566,7 @@ async function load(){
 
  $("copyBtn").onclick=async()=>{
   try{
-    await navigator.clipboard.writeText(location.href);
+    await navigator.clipboard.writeText(postFullUrl);
     showToast("समाचारको लिंक Copy गरियो!");
   } catch(e){
     showToast("लिंक Copy गर्न सकिएन!");
