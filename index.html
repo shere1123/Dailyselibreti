@@ -339,6 +339,24 @@ function setAdContent(container, htmlCode) {
   });
 }
 
+// Monetag काे कोड स्वचालित रूपमा लोड गराउने फंक्सन
+function loadMonetagAd(code) {
+  if (!code) return;
+  const div = document.createElement('div');
+  div.innerHTML = code;
+  document.body.appendChild(div);
+
+  const scripts = div.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if (oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
 // Firestore बाट विज्ञापन (Ads) लोड गर्ने
 async function loadAdsFromFirestore(db){
  try{
@@ -357,6 +375,11 @@ async function loadAdsFromFirestore(db){
    // ३. Footer/Bottom Ad (footer/adFooter)
    const footerCode = data.footer || data.adFooter || data.companyB || "";
    if(footerCode) setAdContent($("footerAdSlot"), footerCode);
+
+   // ४. Monetag Ad (monetag)
+   if(data.monetag) {
+     loadMonetagAd(data.monetag);
+   }
   }
  }catch(e){
   console.error("Ads load error:", e);
