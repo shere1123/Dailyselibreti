@@ -66,7 +66,7 @@ a{text-decoration:none;color:inherit}
   text-align:center;
 }
 .ad-label{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:3px;display:block;}
-.top-ad-banner .ad-slot{font-size:12px;color:#555;font-weight:600;min-height:48px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;border-radius:3px;}
+.top-ad-banner .ad-slot{font-size:12px;color:#555;font-weight:600;min-height:48px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;border-radius:3px;overflow:hidden;}
 
 .label{
   display:inline-block;
@@ -141,7 +141,7 @@ h1{
   letter-spacing: 0.1px;
 }
 
-/* In-Article Custom Embedded Image Styling (टेक्स्टको बीचमा राख्ने फोटोको डिजाइन) */
+/* In-Article Custom Embedded Image Styling */
 .article-inline-img-wrap {
   margin: 25px 0;
   text-align: center;
@@ -172,7 +172,7 @@ h1{
 }
 .content a{color:var(--red);text-decoration:underline}
 
-/* Automatic In-Article Banner Ad Slot (50, 100, 150 Words) */
+/* Automatic In-Article Banner Ad Slot (Every 50 Words) */
 .auto-ad-banner{
   margin:28px 0;
   padding:10px 14px;
@@ -182,7 +182,7 @@ h1{
   text-align:center;
 }
 .ad-tag{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:1px;display:block;margin-bottom:5px}
-.auto-ad-banner .ad-slot{min-height:75px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px;font-weight:bold;border-radius:4px}
+.auto-ad-banner .ad-slot{min-height:75px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px;font-weight:bold;border-radius:4px;overflow:hidden;}
 
 /* Share Buttons */
 .share-section{border-top:1px solid var(--line);padding-top:22px;margin-top:35px}
@@ -272,10 +272,10 @@ h1{
     <article class="article">
       <span class="label" id="category">NEWS</span>
       
-      <!-- Top Small Ad Banner -->
+      <!-- Top Small Ad Banner (Loaded from Admin Panel -> Header Banner Ad Code) -->
       <div class="top-ad-banner">
         <span class="ad-label">Advertisement</span>
-        <div class="ad-slot">[ Small Top Ad Banner Area ]</div>
+        <div class="ad-slot" id="topAdSlot">[ Small Top Ad Banner Area ]</div>
       </div>
 
       <!-- Main Topic / Title -->
@@ -299,7 +299,7 @@ h1{
       </div>
       <div class="caption" id="caption"></div>
 
-      <!-- Main Article Content -->
+      <!-- Main Article Content (Includes 50-word company ads from Admin Panel) -->
       <div class="content" id="content"></div>
 
       <!-- Social Media Share Buttons -->
@@ -377,27 +377,42 @@ function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt
 function safeImage(p){const u=String(p.imageUrl||p.image||"");return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:"";}
 function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new Date(v):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}):"DailySelibreti";}
 
-// Smart Formatter: Handles Paragraphs, Ads (Every 50 words), and Embedded [PHOTO: URL] Tags
+let globalAds = {};
+
+function executeScriptTags(container) {
+  const scripts = container.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if(oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
+// Smart Formatter: Handles Paragraphs, 50-word Ads from Admin Panel, and Photos
 function renderTextWithAdsAndPhotos(text){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
-  // Split content by paragraphs or lines
   const lines = cleanStr.split(/\n+/).map(l => l.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
   let nextAdThreshold = 50; 
   let htmlOutput = "";
 
-  const adBannerHTML = `
+  // Admin panel बाट "समाचारको ५० शब्दपछि Ad Code" मा राखेको कोड यहाँबाट लोड हुन्छ
+  const inlineAdContent = (globalAds && globalAds.inline) ? globalAds.inline : '';
+
+  const adBannerHTML = inlineAdContent ? `
     <div class="auto-ad-banner">
       <span class="ad-tag">Advertisement / विज्ञापन</span>
-      <div class="ad-slot">[ In-Article Responsive Banner Ad ]</div>
+      <div class="ad-slot inline-ad-container">${inlineAdContent}</div>
     </div>
-  `;
+  ` : '';
 
   lines.forEach((line) => {
-    // Check if line is an embedded photo tag like [PHOTO: https://...]
     const photoMatch = line.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     
     if (photoMatch) {
@@ -414,7 +429,7 @@ function renderTextWithAdsAndPhotos(text){
 
       htmlOutput += `<p>${esc(line)}</p>`;
 
-      if (accumulatedWords >= nextAdThreshold) {
+      if (accumulatedWords >= nextAdThreshold && inlineAdContent) {
         htmlOutput += adBannerHTML;
         nextAdThreshold += 50; 
       }
@@ -447,6 +462,17 @@ async function load(){
  let post=null,all=[];
  try{
    const app=initializeApp(firebaseConfig),db=getFirestore(app);
+
+   // सही Path: settings कलेक्सनको 'ads' डकुमेन्टबाट विज्ञापन लोड गर्ने
+   try {
+     const adSnap = await getDoc(doc(db, "settings", "ads"));
+     if (adSnap.exists()) {
+       globalAds = adSnap.data();
+     }
+   } catch(err) {
+     console.error("Ads fetch error:", err);
+   }
+
    const docRef = doc(db,"news",id);
    const snap=await getDoc(docRef);
    
@@ -476,6 +502,15 @@ async function load(){
  $("caption").textContent=post.imageCaption||post.imageCredit||"";
  $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
 
+ // 1. Top Ad Banner (Header Ad) लोड गर्ने
+ const topAdElem = $("topAdSlot");
+ if (globalAds && globalAds.header) {
+   topAdElem.innerHTML = globalAds.header;
+   executeScriptTags(topAdElem);
+ } else {
+   topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+ }
+
  const src=safeImage(post);
  if(src){
    $("cover").src=src;
@@ -486,7 +521,12 @@ async function load(){
 
  const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
  
- $("content").innerHTML=renderTextWithAdsAndPhotos(raw);
+ const contentElem = $("content");
+ contentElem.innerHTML = renderTextWithAdsAndPhotos(raw);
+ 
+ // 2. ५० शब्दपछिका विज्ञापनहरूको स्क्रिप्टहरू एक्जिक्युट गर्ने
+ executeScriptTags(contentElem);
+
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
  const currentUrl = encodeURIComponent(location.href);
