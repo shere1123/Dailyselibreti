@@ -48,7 +48,7 @@ button{cursor:pointer}
 .breaking strong{background:var(--red);color:white;padding:6px 10px;font-size:11px;white-space:nowrap}
 .breaking span{padding:6px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* Compact Small Banner Ad Styling */
+/* Compact Banner Ad Styling */
 .main-top-ad{
   margin:8px 0 14px;
   background:#fff;
@@ -56,9 +56,10 @@ button{cursor:pointer}
   border-radius:3px;
   padding:5px 8px;
   text-align:center;
+  overflow:hidden;
 }
 .ad-label{font-size:9px;text-transform:uppercase;color:#888;letter-spacing:0.5px;margin-bottom:2px;display:block;}
-.ad-slot{font-size:11px;color:#555;font-weight:600;min-height:45px;background:#f9f9f9;display:flex;align-items:center;justify-content:center;border-radius:2px;}
+.ad-slot{font-size:11px;color:#555;font-weight:600;min-height:45px;background:#ffffff;display:flex;align-items:center;justify-content:center;border-radius:2px;overflow:hidden;}
 
 .heading{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:2px solid #222;margin:22px 0 12px;padding-bottom:6px}
 .heading h2{margin:0;font-size:20px;font-weight:800;line-height:1.35}
@@ -96,8 +97,8 @@ button{cursor:pointer}
 .excerpt{font-size:12px;color:#6f6f6f;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .read{display:inline-block;color:var(--red);font-size:12px;font-weight:800;margin-top:9px}
 
-/* Small Compact Feed Ad Banner */
-.feed-ad-banner{margin:20px 0;background:#fff;border:1px solid var(--line);padding:8px 10px;text-align:center;border-radius:3px;}
+/* In-Feed & Bottom Banner Styling */
+.feed-ad-banner{margin:20px 0;background:#fff;border:1px solid var(--line);padding:8px 10px;text-align:center;border-radius:3px;overflow:hidden;}
 
 .state{grid-column:1/-1;background:white;padding:26px;text-align:center;border:1px dashed #ccc;color:#666}
 .hidden{display:none!important}
@@ -183,10 +184,10 @@ button{cursor:pointer}
 <main class="wrap">
  <div class="breaking"><strong>BREAKING</strong><span id="breakingText">DailySelibreti मा नवीनतम समाचार पढ्नुहोस्।</span></div>
 
- <!-- सानो साइजको चिटिक्क परेको Ad Banner -->
+ <!-- १. Header Ad Slot (शीर्षमा रहने विज्ञापन) -->
  <div class="main-top-ad">
   <span class="ad-label">Advertisement</span>
-  <div class="ad-slot" id="headerAdSlot">[ Admob / AdSense Small Banner ]</div>
+  <div class="ad-slot" id="headerAdSlot">[ Small Header Ad Banner ]</div>
  </div>
 
  <section id="featured">
@@ -203,7 +204,7 @@ button{cursor:pointer}
   <div class="grid" id="newsGrid"></div>
  </section>
 
- <!-- बीचको सानो Ad Banner -->
+ <!-- २. In-Feed Ad Slot (समाचार सूचीको बिचमा रहने विज्ञापन) -->
  <div class="feed-ad-banner">
   <span class="ad-label">Advertisement</span>
   <div class="ad-slot" id="inlineAdSlot">[ Small In-Feed Ad Banner ]</div>
@@ -215,6 +216,13 @@ button{cursor:pointer}
  </section>
 
  <div id="categorySections"></div>
+
+ <!-- ३. Bottom / Footer Ad Slot (पेजको तल्लो भागमा रहने विज्ञापन) -->
+ <div class="feed-ad-banner" style="margin-top:30px;">
+  <span class="ad-label">Advertisement</span>
+  <div class="ad-slot" id="footerAdSlot">[ Footer / Bottom Ad Banner ]</div>
+ </div>
+
 </main>
 
 <footer class="footer"><div class="wrap">
@@ -314,34 +322,41 @@ $("searchInput").oninput=e=>{if(e.target.value.trim().length>=2)search(e.target.
 $("clearSearch").onclick=e=>{e.preventDefault();$("searchInput").value="";home();};
 $("showAll").onclick=e=>{e.preventDefault();home();};
 
-// Firestore बाट विज्ञापन (Ads) लोड र रेन्डर गर्ने फङ्सन
+// विज्ञापन इन्सर्ट गर्ने र Script Tags एक्जिक्युट गराउने सुरक्षित फंक्सन
+function setAdContent(container, htmlCode) {
+  if (!container || !htmlCode) return;
+  container.innerHTML = htmlCode;
+  
+  // HTML भित्र Script ट्यागहरू भएमा त्यसलाई पुनः सिर्जना गरेर रन गराउने
+  const scripts = container.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if (oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
+// Firestore बाट विज्ञापन (Ads) लोड गर्ने
 async function loadAdsFromFirestore(db){
  try{
   const snap=await getDoc(doc(db,"settings","ads"));
   if(snap.exists()){
    const data=snap.data();
    
-   // Header Ad
-   if(data.header){
-    const headerSlot=$("headerAdSlot");
-    if(headerSlot){
-     headerSlot.innerHTML="";
-     const range=document.createRange();
-     range.selectNode(headerSlot);
-     headerSlot.appendChild(range.createContextualFragment(data.header));
-    }
-   }
-   
-   // Inline Ad
-   if(data.inline){
-    const inlineSlot=$("inlineAdSlot");
-    if(inlineSlot){
-     inlineSlot.innerHTML="";
-     const range=document.createRange();
-     range.selectNode(inlineSlot);
-     inlineSlot.appendChild(range.createContextualFragment(data.inline));
-    }
-   }
+   // १. Header Ad (adHeader/header)
+   const headerCode = data.header || data.adHeader || "";
+   if(headerCode) setAdContent($("headerAdSlot"), headerCode);
+
+   // २. In-Feed Ad (companyA वा inline)
+   const inlineCode = data.inline || data.companyA || data.promo || "";
+   if(inlineCode) setAdContent($("inlineAdSlot"), inlineCode);
+
+   // ३. Footer/Bottom Ad (footer/adFooter)
+   const footerCode = data.footer || data.adFooter || data.companyB || "";
+   if(footerCode) setAdContent($("footerAdSlot"), footerCode);
   }
  }catch(e){
   console.error("Ads load error:", e);
@@ -362,10 +377,10 @@ async function start(){
  $("breakingText").textContent=posts.length?title(posts[0]):"DailySelibreti मा स्वागत छ।";
  buildCategories();home();
  
- // विज्ञापन लोड गर्ने फङ्सन कल गरिएको
+ // विज्ञापन लोड गर्ने फङ्सन
  loadAdsFromFirestore(db);
 }
-buildCategories();start();
+start();
 </script>
 </body>
 </html>
