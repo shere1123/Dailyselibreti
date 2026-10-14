@@ -394,6 +394,24 @@ function executeScriptTags(container) {
   });
 }
 
+// Monetag काे कोड स्वचालित रूपमा लोड गराउने फंक्सन
+function loadMonetagAd(code) {
+  if (!code) return;
+  const div = document.createElement('div');
+  div.innerHTML = code;
+  document.body.appendChild(div);
+
+  const scripts = div.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if (oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+}
+
 function renderTextWithAdsAndPhotos(text){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
@@ -495,6 +513,11 @@ async function load(){
      const adSnap = await getDoc(doc(db, "settings", "ads"));
      if (adSnap.exists()) {
        globalAds = adSnap.data();
+       
+       // Monetag Ad लोड गर्ने
+       if (globalAds.monetag) {
+         loadMonetagAd(globalAds.monetag);
+       }
      }
    } catch(err) {
      console.error("Ads fetch error:", err);
@@ -554,7 +577,6 @@ async function load(){
 
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
- // शेयर लिङ्कको लागि ठ्याक्कै यो समाचारको फुल URL
  const postFullUrl = window.location.origin + window.location.pathname + "?id=" + encodeURIComponent(post.id);
  const currentUrl = encodeURIComponent(postFullUrl);
  const shareText = encodeURIComponent(post.title || "");
