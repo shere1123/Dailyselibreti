@@ -172,17 +172,18 @@ h1{
 }
 .content a{color:var(--red);text-decoration:underline}
 
-/* Automatic In-Article Banner Ad Slot (Every 50 Words) */
+/* Automatic In-Article Banner Ad Slot */
 .auto-ad-banner{
-  margin:28px 0;
-  padding:10px 14px;
-  background:#fafafa;
-  border:1px dashed #cccccc;
-  border-radius:6px;
+  margin:24px 0;
+  padding:0;
+  background:transparent;
+  border:none;
   text-align:center;
+  overflow:hidden;
+  width:100%;
 }
-.ad-tag{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:1px;display:block;margin-bottom:5px}
-.auto-ad-banner .ad-slot{min-height:75px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;color:#444;font-size:13px;font-weight:bold;border-radius:4px;overflow:hidden;}
+.ad-tag{font-size:10px;text-transform:uppercase;color:#888;letter-spacing:1px;display:block;margin-bottom:4px;text-align:center;}
+.auto-ad-banner .ad-slot{width:100%;background:#ffffff;display:flex;align-items:center;justify-content:center;border-radius:6px;overflow:hidden;}
 
 /* Share Buttons */
 .share-section{border-top:1px solid var(--line);padding-top:22px;margin-top:35px}
@@ -272,7 +273,7 @@ h1{
     <article class="article">
       <span class="label" id="category">NEWS</span>
       
-      <!-- Top Small Ad Banner (Loaded from Admin Panel -> Header Banner Ad Code) -->
+      <!-- Top Small Ad Banner -->
       <div class="top-ad-banner">
         <span class="ad-label">Advertisement</span>
         <div class="ad-slot" id="topAdSlot">[ Small Top Ad Banner Area ]</div>
@@ -299,7 +300,7 @@ h1{
       </div>
       <div class="caption" id="caption"></div>
 
-      <!-- Main Article Content (Includes 50-word company ads from Admin Panel) -->
+      <!-- Main Article Content -->
       <div class="content" id="content"></div>
 
       <!-- Social Media Share Buttons -->
@@ -391,7 +392,7 @@ function executeScriptTags(container) {
   });
 }
 
-// Smart Formatter: Handles Paragraphs, 50-word Ads from Admin Panel, and Photos
+// Smart Formatter: सुरुको ७० शब्दमा एडसेन्स (adSense70) र त्यसपछि क्रमशः ७०-७० शब्दको अन्तरालमा कम्पनीका विज्ञापनहरू
 function renderTextWithAdsAndPhotos(text){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
@@ -399,18 +400,18 @@ function renderTextWithAdsAndPhotos(text){
   const lines = cleanStr.split(/\n+/).map(l => l.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
-  let nextAdThreshold = 50; 
+  let nextAdThreshold = 70; // पहिलो विज्ञापन ७० शब्दमा
+  let adSequenceIndex = 0;   // पालो ट्र्याक गर्ने काउन्टर
   let htmlOutput = "";
 
-  // Admin panel बाट "समाचारको ५० शब्दपछि Ad Code" मा राखेको कोड यहाँबाट लोड हुन्छ
-  const inlineAdContent = (globalAds && globalAds.inline) ? globalAds.inline : '';
+  // एडमिन प्यानलको नयाँ adSense70 बक्स र कम्पनीका विज्ञापनहरू तान्ने
+  const adAdSense = (globalAds && globalAds.adSense70) ? globalAds.adSense70 : ''; 
+  const adCompanyA = (globalAds && globalAds.companyA) ? globalAds.companyA : '';
+  const adCompanyB = (globalAds && globalAds.companyB) ? globalAds.companyB : '';
+  const adCompanyC = (globalAds && globalAds.companyC) ? globalAds.companyC : '';
 
-  const adBannerHTML = inlineAdContent ? `
-    <div class="auto-ad-banner">
-      <span class="ad-tag">Advertisement / विज्ञापन</span>
-      <div class="ad-slot inline-ad-container">${inlineAdContent}</div>
-    </div>
-  ` : '';
+  // विज्ञापनहरूको निश्चित क्रम: AdSense (adSense70) ➔ Company A ➔ Company B ➔ Company C
+  const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
   lines.forEach((line) => {
     const photoMatch = line.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
@@ -429,9 +430,21 @@ function renderTextWithAdsAndPhotos(text){
 
       htmlOutput += `<p>${esc(line)}</p>`;
 
-      if (accumulatedWords >= nextAdThreshold && inlineAdContent) {
-        htmlOutput += adBannerHTML;
-        nextAdThreshold += 50; 
+      // शब्द संख्या ७० पुगेपछि वा पार गरेपछि विज्ञापन इन्सर्ट गर्ने
+      if (accumulatedWords >= nextAdThreshold && sequenceAds.length > 0) {
+        const currentAd = sequenceAds[adSequenceIndex % sequenceAds.length];
+
+        if (currentAd) {
+          htmlOutput += `
+            <div class="auto-ad-banner">
+              <span class="ad-tag">Advertisement / विज्ञापन</span>
+              <div class="ad-slot inline-ad-container">${currentAd}</div>
+            </div>
+          `;
+        }
+
+        adSequenceIndex++;
+        nextAdThreshold += 70; // त्यसपछि फेरि हरेक ७० शब्दको अन्तरालमा अर्को विज्ञापन
       }
     }
   });
@@ -463,7 +476,6 @@ async function load(){
  try{
    const app=initializeApp(firebaseConfig),db=getFirestore(app);
 
-   // सही Path: settings कलेक्सनको 'ads' डकुमेन्टबाट विज्ञापन लोड गर्ने
    try {
      const adSnap = await getDoc(doc(db, "settings", "ads"));
      if (adSnap.exists()) {
@@ -502,7 +514,6 @@ async function load(){
  $("caption").textContent=post.imageCaption||post.imageCredit||"";
  $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
 
- // 1. Top Ad Banner (Header Ad) लोड गर्ने
  const topAdElem = $("topAdSlot");
  if (globalAds && globalAds.header) {
    topAdElem.innerHTML = globalAds.header;
@@ -524,7 +535,6 @@ async function load(){
  const contentElem = $("content");
  contentElem.innerHTML = renderTextWithAdsAndPhotos(raw);
  
- // 2. ५० शब्दपछिका विज्ञापनहरूको स्क्रिप्टहरू एक्जिक्युट गर्ने
  executeScriptTags(contentElem);
 
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
