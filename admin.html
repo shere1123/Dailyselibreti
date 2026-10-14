@@ -77,7 +77,6 @@ td{color:#eee}
 .thumb{width:62px;height:45px;object-fit:cover;border-radius:5px}
 .badge{background:#303030;padding:4px 8px;border-radius:6px;font-size:12px}
 .hidden{display:none!important}
-.notice{padding:12px;border-radius:8px;background:#252525;color:#ddd;margin:12px 0}
 .loginwrap{max-width:420px;margin:9vh auto;padding:20px}
 .loginbox{background:var(--panel);border:1px solid var(--border);padding:24px;border-radius:14px}
 .msg{margin:12px 0;color:#ffb8b8;white-space:pre-wrap;font-weight:bold}
@@ -228,11 +227,24 @@ td{color:#eee}
       <form id="adsForm" class="card">
         <div class="field">
           <label>Header Banner Ad Code (Top को लागि)</label>
-          <textarea id="adHeader" placeholder="Header ad code (Adsterra / AdSense)..."></textarea>
+          <textarea id="adHeader" placeholder="Header ad code..."></textarea>
+        </div>
+        <!-- विशेष थप गरिएको बक्स: सुरुको ७० शब्दमा देखाउने AdSense / Banner Ad -->
+        <div class="field" style="background: #201515; padding: 12px; border-radius: 8px; border: 1px dashed var(--red);">
+          <label style="color: #ff6b7b;">🔥 AdSense / Banner Ad Code (सुरुको ७० शब्दमा स्वतः देखाउने)</label>
+          <textarea id="adSense70" placeholder="AdSense banner code here..."></textarea>
         </div>
         <div class="field">
-          <label>Promotional / Native Ad Code (कम्पनीको प्रमोसनल विज्ञापन)</label>
-          <textarea id="adPromo" placeholder="Promotional ad script or native banner code..."></textarea>
+          <label>Company A Ad Code (कम्पनी १)</label>
+          <textarea id="adCompanyA" placeholder="Company A ad script..."></textarea>
+        </div>
+        <div class="field">
+          <label>Company B Ad Code (कम्पनी २)</label>
+          <textarea id="adCompanyB" placeholder="Company B ad script..."></textarea>
+        </div>
+        <div class="field">
+          <label>Company C Ad Code (कम्पनी ३)</label>
+          <textarea id="adCompanyC" placeholder="Company C ad script..."></textarea>
         </div>
         <div class="field">
           <label>समाचारको तल Ad Code</label>
@@ -485,7 +497,6 @@ async function removeNews(id) {
   }
 }
 
-// NEWS FORM SUBMIT
 $("newsForm").addEventListener("submit", async e => {
   e.preventDefault();
   if (!currentUser) return;
@@ -543,7 +554,10 @@ async function loadAds() {
     const snap = await getDoc(doc(db, "settings", "ads"));
     const d = snap.exists() ? snap.data() : {};
     $("adHeader").value = d.header || "";
-    $("adPromo").value = d.promo || "";
+    $("adSense70").value = d.adSense70 || "";
+    $("adCompanyA").value = d.companyA || "";
+    $("adCompanyB").value = d.companyB || "";
+    $("adCompanyC").value = d.companyC || "";
     $("adFooter").value = d.footer || "";
     $("adSidebar").value = d.sidebar || "";
   } catch (err) { message("adsMsg", err.message); }
@@ -558,7 +572,10 @@ $("adsForm").addEventListener("submit", async e => {
   try {
     await setDoc(doc(db, "settings", "ads"), {
       header: $("adHeader").value,
-      promo: $("adPromo").value,
+      adSense70: $("adSense70").value,
+      companyA: $("adCompanyA").value,
+      companyB: $("adCompanyB").value,
+      companyC: $("adCompanyC").value,
       footer: $("adFooter").value,
       sidebar: $("adSidebar").value,
       updatedAt: serverTimestamp()
@@ -601,7 +618,7 @@ $("pagesForm").addEventListener("submit", async e => {
   } catch (err) { 
     message("pagesMsg", "Save असफल: " + err.message); 
   } finally {
-    btn.disabled, (btn.disabled = false);
+    btn.disabled = false;
   }
 });
 
