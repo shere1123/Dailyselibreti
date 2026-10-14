@@ -228,6 +228,10 @@ td{color:#eee}
     <section id="page-ads" class="hidden">
       <h1>विज्ञापन व्यवस्थापन</h1>
       <form id="adsForm" class="card">
+        <div class="field" style="background: #19201a; padding: 12px; border-radius: 8px; border: 1px dashed var(--green);">
+          <label style="color: #4cd98d;">🚀 Monetag Multi-tag Script Code (यहाँ Monetag को कोड राख्नुहोस्)</label>
+          <textarea id="adMonetag" placeholder="Monetag multi-tag script here..."></textarea>
+        </div>
         <div class="field">
           <label>Header Banner Ad Code (Top को लागि)</label>
           <textarea id="adHeader" placeholder="Header ad code..."></textarea>
@@ -358,7 +362,6 @@ function showPage(name) {
 document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
 
-// समाचारको बीचमा फोटो राख्ने बटनको फिचर
 $("insertContentImageBtn").addEventListener("click", () => {
   const imgUrl = prompt("फोटोको Direct URL (जस्तै ImgBB वा ड्राइभको लिङ्क) यहाँ हाल्नुहोस्:");
   if (!imgUrl) return;
@@ -574,6 +577,7 @@ async function loadAds() {
   try {
     const snap = await getDoc(doc(db, "settings", "ads"));
     const d = snap.exists() ? snap.data() : {};
+    $("adMonetag").value = d.monetag || "";
     $("adHeader").value = d.header || "";
     $("adSense70").value = d.adSense70 || "";
     $("adCompanyA").value = d.companyA || "";
@@ -592,6 +596,7 @@ $("adsForm").addEventListener("submit", async e => {
 
   try {
     await setDoc(doc(db, "settings", "ads"), {
+      monetag: $("adMonetag").value,
       header: $("adHeader").value,
       adSense70: $("adSense70").value,
       companyA: $("adCompanyA").value,
