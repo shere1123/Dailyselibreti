@@ -13,7 +13,10 @@
   --border:#333;--green:#20b66b;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:"Mukta","Roboto",sans-serif;}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Mukta","Roboto",sans-serif;
+}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 .topbar{
@@ -39,15 +42,15 @@ h1{font-size:25px;margin:0 0 8px}
 h2{font-size:20px;margin:0 0 16px}
 .sub{color:var(--muted);margin-bottom:22px}
 .stats{
-  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
-  gap:12px;margin:18px 0;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;margin:18px 0;
 }
 .stat,.card{
   background:var(--panel);border:1px solid var(--border);
   border-radius:12px;padding:17px;margin-bottom:16px;
 }
 .stat small{color:var(--muted)}
-.stat strong{display:block;font-size:24px;margin-top:7px}
+.stat strong{display:block;font-size:28px;margin-top:7px}
 .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .field{margin-bottom:14px;min-width:0}
 .field label{display:block;font-weight:700;margin-bottom:5px}
@@ -63,6 +66,7 @@ textarea{min-height:110px;resize:vertical}
   padding:10px 15px;font-weight:700;margin:3px 3px 3px 0;
 }
 .btn.secondary{background:#333}
+.btn.green{background:#167c4a}
 .btn.danger{background:#9e1628}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .tablewrap{overflow-x:auto}
@@ -77,11 +81,12 @@ td{color:#eee}
 .loginbox{background:var(--panel);border:1px solid var(--border);padding:24px;border-radius:14px}
 .msg{margin:12px 0;color:#ffb8b8;white-space:pre-wrap;font-weight:bold}
 .preview{max-width:240px;max-height:150px;object-fit:contain;display:block;margin-top:8px}
-@media(max-width:1000px){
- .stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:850px){
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sidebar{width:190px}
+ .main{padding:14px}
 }
 @media(max-width:600px){
- .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
  .topbar{height:58px;padding:0 12px}
  .brand{font-size:18px}
  .layout{display:block}
@@ -90,8 +95,9 @@ td{color:#eee}
    padding:8px;border-right:0;border-bottom:1px solid var(--border)
  }
  .nav{width:auto;white-space:nowrap;padding:9px 12px;margin:0}
+ .stats{gap:8px}
  .stat{padding:12px}
- .stat strong{font-size:20px}
+ .stat strong{font-size:23px}
  .formgrid{grid-template-columns:1fr}
  .full{grid-column:auto}
  .main{padding:12px}
@@ -139,16 +145,12 @@ td{color:#eee}
     <section id="page-dashboard">
       <h1>Dashboard</h1>
       <p class="sub">तपाईंको वेबसाइटको अवस्था</p>
-      
-      <!-- Stats Boxes with Ads Count Box Added -->
       <div class="stats">
         <div class="stat"><small>कुल समाचार</small><strong id="totalNews">0</strong></div>
         <div class="stat"><small>प्रकाशित</small><strong id="publishedNews">0</strong></div>
         <div class="stat"><small>ड्राफ्ट</small><strong id="draftNews">0</strong></div>
-        <div class="stat"><small>कुल Views</small><strong id="totalViews">0</strong></div>
-        <div class="stat" style="border-color: var(--green);"><small style="color: #4cd98d;">📢 Ads देखिएको (Impressions)</small><strong id="totalAdImpressions" style="color: #4cd98d;">0</strong></div>
+        <div class="stat"><small>कुल देखिएका Views</small><strong id="totalViews">0</strong></div>
       </div>
-
       <div class="card">
         <h2>छिटो काम</h2>
         <button class="btn" data-goto="editor">+ नयाँ समाचार</button>
@@ -159,24 +161,14 @@ td{color:#eee}
 
     <section id="page-news" class="hidden">
       <h1>समाचार व्यवस्थापन</h1>
-      <p class="sub">समाचार, भिजिटर देश र व्यवस्थापन।</p>
+      <p class="sub">समाचार सम्पादन, प्रकाशित वा हटाउनुहोस्।</p>
       <div class="card">
         <input id="newsSearch" placeholder="शीर्षक वा Category खोज्नुहोस्...">
       </div>
       <div class="card tablewrap">
         <table>
-          <thead>
-            <tr>
-              <th>फोटो</th>
-              <th>शीर्षक</th>
-              <th>Category</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th>देश (Traffic)</th>
-              <th>कार्य</th>
-            </tr>
-          </thead>
-          <tbody id="newsRows"><tr><td colspan="7">समाचार लोड हुँदैछ...</td></tr></tbody>
+          <thead><tr><th>फोटो</th><th>शीर्षक</th><th>Category</th><th>Status</th><th>Views</th><th>कार्य</th></tr></thead>
+          <tbody id="newsRows"><tr><td colspan="6">समाचार लोड हुँदैछ...</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -224,7 +216,7 @@ td{color:#eee}
               <label style="margin-bottom:0">समाचारको पूरा सामग्री *</label>
               <button type="button" id="insertContentImageBtn" class="btn secondary" style="padding:4px 10px; font-size:13px;">📷 बीचमा फोटो राख्नुहोस्</button>
             </div>
-            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्..."></textarea>
+            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्... (जहाँ फोटो राख्नु छ, त्यहाँ कर्सर राखेर माथिको बटन थिच्नुहोस्)"></textarea>
           </div>
         </div>
         <button class="btn" type="submit" id="saveNewsBtn">Save गर्नुहोस्</button>
@@ -237,22 +229,37 @@ td{color:#eee}
       <h1>विज्ञापन व्यवस्थापन</h1>
       <form id="adsForm" class="card">
         <div class="field" style="background: #19201a; padding: 12px; border-radius: 8px; border: 1px dashed var(--green);">
-          <label style="color: #4cd98d;">🚀 Monetag Script Code</label>
+          <label style="color: #4cd98d;">🚀 Monetag Multi-tag Script Code (यहाँ Monetag को कोड राख्नुहोस्)</label>
           <textarea id="adMonetag" placeholder="Monetag multi-tag script here..."></textarea>
         </div>
         <div class="field">
-          <label>Header Banner Ad Code</label>
+          <label>Header Banner Ad Code (Top को लागि)</label>
           <textarea id="adHeader" placeholder="Header ad code..."></textarea>
         </div>
         <div class="field" style="background: #201515; padding: 12px; border-radius: 8px; border: 1px dashed var(--red);">
-          <label style="color: #ff6b7b;">🔥 AdSense / Banner Ad Code (सुरुको ७० शब्दमा)</label>
+          <label style="color: #ff6b7b;">🔥 AdSense / Banner Ad Code (सुरुको ७० शब्दमा स्वतः देखाउने)</label>
           <textarea id="adSense70" placeholder="AdSense banner code here..."></textarea>
         </div>
-        <div class="field"><label>Company A Ad Code</label><textarea id="adCompanyA"></textarea></div>
-        <div class="field"><label>Company B Ad Code</label><textarea id="adCompanyB"></textarea></div>
-        <div class="field"><label>Company C Ad Code</label><textarea id="adCompanyC"></textarea></div>
-        <div class="field"><label>समाचारको तल Ad Code</label><textarea id="adFooter"></textarea></div>
-        <div class="field"><label>Sidebar Ad Code</label><textarea id="adSidebar"></textarea></div>
+        <div class="field">
+          <label>Company A Ad Code (कम्पनी १)</label>
+          <textarea id="adCompanyA" placeholder="Company A ad script..."></textarea>
+        </div>
+        <div class="field">
+          <label>Company B Ad Code (कम्पनी २)</label>
+          <textarea id="adCompanyB" placeholder="Company B ad script..."></textarea>
+        </div>
+        <div class="field">
+          <label>Company C Ad Code (कम्पनी ३)</label>
+          <textarea id="adCompanyC" placeholder="Company C ad script..."></textarea>
+        </div>
+        <div class="field">
+          <label>समाचारको तल Ad Code</label>
+          <textarea id="adFooter" placeholder="Footer ad code..."></textarea>
+        </div>
+        <div class="field">
+          <label>Sidebar Ad Code</label>
+          <textarea id="adSidebar" placeholder="Sidebar ad code..."></textarea>
+        </div>
         <button class="btn" type="submit" id="saveAdsBtn">विज्ञापन Save गर्नुहोस्</button>
         <div id="adsMsg" class="msg"></div>
       </form>
@@ -271,8 +278,14 @@ td{color:#eee}
             <option value="disclaimer">Disclaimer</option>
           </select>
         </div>
-        <div class="field"><label>पेज शीर्षक</label><input id="pageTitle" required></div>
-        <div class="field"><label>पेज सामग्री</label><textarea id="pageContent" style="min-height:260px" required></textarea></div>
+        <div class="field">
+          <label>पेज शीर्षक</label>
+          <input id="pageTitle" required>
+        </div>
+        <div class="field">
+          <label>पेज सामग्री</label>
+          <textarea id="pageContent" style="min-height:260px" required></textarea>
+        </div>
         <button class="btn" type="submit" id="savePagesBtn">पेज Save गर्नुहोस्</button>
         <div id="pagesMsg" class="msg"></div>
       </form>
@@ -281,10 +294,16 @@ td{color:#eee}
     <section id="page-settings" class="hidden">
       <h1>वेबसाइट सेटिङ</h1>
       <form id="settingsForm" class="card">
-        <div class="field"><label>वेबसाइट नाम</label><input id="siteName" value="DailySelibreti" required></div>
-        <div class="field"><label>Logo URL</label><input id="siteLogo" type="url" placeholder="https://example.com/logo.png"></div>
+        <div class="field">
+          <label>वेबसाइट नाम</label>
+          <input id="siteName" value="DailySelibreti" required>
+        </div>
+        <div class="field">
+          <label>Logo URL</label>
+          <input id="siteLogo" type="url" placeholder="https://example.com/logo.png">
+        </div>
         <button class="btn" type="submit" id="saveSettingsBtn">Settings Save गर्नुहोस्</button>
-        <div id="settingsMsg" class="msg"></div>
+        <div id="settingsMsg" class="msg">कोषहरू सुरक्षित गर्नुहोस्</div>
       </form>
     </section>
   </main>
@@ -335,7 +354,7 @@ function showPage(name) {
   document.querySelectorAll("main > section").forEach(s => s.classList.add("hidden"));
   $("page-" + name)?.classList.remove("hidden");
   document.querySelectorAll(".nav").forEach(b => b.classList.toggle("active", b.dataset.page === name));
-  if (name === "news" || name === "dashboard") { loadNews(); loadAdStats(); }
+  if (name === "news" || name === "dashboard") loadNews();
   if (name === "ads") loadAds();
   if (name === "pages") loadPageContent();
   if (name === "settings") loadSettings();
@@ -344,15 +363,19 @@ document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () =>
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
 
 $("insertContentImageBtn").addEventListener("click", () => {
-  const imgUrl = prompt("फोटोको Direct URL यहाँ हाल्नुहोस्:");
+  const imgUrl = prompt("फोटोको Direct URL (जस्तै ImgBB वा ड्राइभको लिङ्क) यहाँ हाल्नुहोस्:");
   if (!imgUrl) return;
   const validUrl = validHttpUrl(imgUrl.trim());
-  if (!validUrl) { alert("अमान्य URL!"); return; }
+  if (!validUrl) {
+    alert("अमान्य URL! कृपया सही लिङ्क हाल्नुहोस्।");
+    return;
+  }
   const tag = `\n<img src="${validUrl}" alt="Photo" style="max-width:100%;height:auto;border-radius:8px;margin:10px 0;">\n`;
   const textarea = $("newsContent");
   const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
   const text = textarea.value;
-  textarea.value = text.substring(0, start) + tag + text.substring(textarea.selectionEnd);
+  textarea.value = text.substring(0, start) + tag + text.substring(end);
   textarea.focus();
   textarea.selectionStart = textarea.selectionEnd = start + tag.length;
 });
@@ -386,7 +409,6 @@ onAuthStateChanged(auth, async user => {
     $("adminApp").classList.remove("hidden");
     $("logoutBtn").classList.remove("hidden");
     await loadNews();
-    await loadAdStats();
   } catch (err) {
     await signOut(auth);
     message("loginMsg", "Admin जाँच हुन सकेन: " + err.message);
@@ -395,35 +417,24 @@ onAuthStateChanged(auth, async user => {
 
 $("logoutBtn").addEventListener("click", () => signOut(auth));
 
-// विज्ञापन इम्प्रेशन (Impressions) लोड गर्ने फंक्सन
-async function loadAdStats() {
-  try {
-    const adStatsSnap = await getDoc(doc(db, "settings", "adStats"));
-    if (adStatsSnap.exists()) {
-      const data = adStatsSnap.data();
-      $("totalAdImpressions").textContent = Number(data.totalImpressions || 0).toLocaleString();
-    } else {
-      $("totalAdImpressions").textContent = "0";
-    }
-  } catch (err) {
-    console.error("Ad stats load error:", err);
-  }
-}
-
 async function loadNews() {
   if (!currentUser || loading) return;
   loading = true;
   try {
     const snap = await getDocs(collection(db, "news"));
     allNews = snap.docs.map(d => ({ id:d.id, ...d.data() }));
-    allNews.sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+    allNews.sort((a,b) => {
+      const at = a.createdAt?.toMillis?.() || 0;
+      const bt = b.createdAt?.toMillis?.() || 0;
+      return bt - at;
+    });
     $("totalNews").textContent = allNews.length;
     $("publishedNews").textContent = allNews.filter(n => ["published","publish"].includes(n.status)).length;
     $("draftNews").textContent = allNews.filter(n => n.status === "draft").length;
     $("totalViews").textContent = allNews.reduce((sum,n) => sum + (Number(n.views)||0), 0).toLocaleString();
     renderNewsRows();
   } catch (err) {
-    $("newsRows").innerHTML = `<tr><td colspan="7">समाचार लोड भएन: ${safeText(err.message)}</td></tr>`;
+    $("newsRows").innerHTML = `<tr><td colspan="6">समाचार लोड भएन: ${safeText(err.message)}</td></tr>`;
   } finally {
     loading = false;
   }
@@ -431,29 +442,22 @@ async function loadNews() {
 
 function renderNewsRows() {
   const term = $("newsSearch").value.trim().toLowerCase();
-  const list = allNews.filter(n => String(n.title||"").toLowerCase().includes(term) || String(n.category||"").toLowerCase().includes(term));
+  const list = allNews.filter(n =>
+    String(n.title||"").toLowerCase().includes(term) ||
+    String(n.category||"").toLowerCase().includes(term)
+  );
   if (!list.length) {
-    $("newsRows").innerHTML = '<tr><td colspan="7">समाचार भेटिएन।</td></tr>';
+    $("newsRows").innerHTML = '<tr><td colspan="6">समाचार भेटिएन।</td></tr>';
     return;
   }
   $("newsRows").innerHTML = list.map(n => {
     const img = validHttpUrl(n.imageUrl || n.image);
-    let countryBadges = "—";
-    if (n.countries && typeof n.countries === 'object') {
-      const entries = Object.entries(n.countries);
-      if (entries.length > 0) {
-        countryBadges = entries.map(([country, count]) => 
-          `<span style="background:#222; border:1px solid #444; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:3px; white-space:nowrap; display:inline-block; margin-bottom:2px;">🌐 ${safeText(country)}: <b>${count}</b></span>`
-        ).join("");
-      }
-    }
     return `<tr>
       <td>${img ? `<img class="thumb" src="${safeText(img)}" alt="">` : "—"}</td>
       <td>${safeText(n.title || "शीर्षक छैन")}</td>
       <td>${safeText(n.category || "—")}</td>
       <td><span class="badge">${safeText(n.status || "draft")}</span></td>
-      <td><b>${Number(n.views)||0}</b></td>
-      <td>${countryBadges}</td>
+      <td>${Number(n.views)||0}</td>
       <td>
         <button class="btn secondary" data-edit="${safeText(n.id)}">Edit</button>
         <button class="btn danger" data-delete="${safeText(n.id)}">Delete</button>
@@ -461,8 +465,10 @@ function renderNewsRows() {
     </tr>`;
   }).join("");
 
-  document.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => editNews(b.dataset.edit)));
-  document.querySelectorAll("[data-delete]").forEach(b => b.addEventListener("click", () => removeNews(b.dataset.delete)));
+  document.querySelectorAll("[data-edit]").forEach(b =>
+    b.addEventListener("click", () => editNews(b.dataset.edit)));
+  document.querySelectorAll("[data-delete]").forEach(b =>
+    b.addEventListener("click", () => removeNews(b.dataset.delete)));
 }
 $("newsSearch").addEventListener("input", renderNewsRows);
 
@@ -477,8 +483,12 @@ $("resetNews").addEventListener("click", resetNewsForm);
 
 $("newsImage").addEventListener("input", () => {
   const url = validHttpUrl($("newsImage").value.trim());
-  if (url) { $("imagePreview").src = url; $("imagePreview").classList.remove("hidden"); }
-  else { $("imagePreview").classList.add("hidden"); }
+  if (url) {
+    $("imagePreview").src = url;
+    $("imagePreview").classList.remove("hidden");
+  } else {
+    $("imagePreview").classList.add("hidden");
+  }
 });
 
 function editNews(id) {
@@ -487,25 +497,34 @@ function editNews(id) {
   $("editId").value = id;
   $("newsTitle").value = n.title || "";
   $("newsCategory").value = n.category || "Hollywood Movies";
-  $("newsStatus").value = ["published","publish"].includes(n.status) ? "published" : "draft";
+  $("newsStatus").value = n.status === "published" || n.status === "publish" ? "published" : "draft";
   $("newsImage").value = n.imageUrl || n.image || "";
   $("newsExcerpt").value = n.excerpt || n.summary || "";
   $("newsContent").value = n.content || "";
   $("editorHeading").textContent = "समाचार सम्पादन";
   const url = validHttpUrl($("newsImage").value);
-  if (url) { $("imagePreview").src = url; $("imagePreview").classList.remove("hidden"); }
+  if (url) {
+    $("imagePreview").src = url;
+    $("imagePreview").classList.remove("hidden");
+  }
   showPage("editor");
 }
 
 async function removeNews(id) {
-  if (!confirm("यो समाचार स्थायी रूपमा हटाउने हो?")) return;
-  try { await deleteDoc(doc(db, "news", id)); await loadNews(); }
-  catch (err) { alert("हटाउन सकिएन: " + err.message); }
+  const n = allNews.find(item => item.id === id);
+  if (!n || !confirm("यो समाचार स्थायी रूपमा हटाउने हो?")) return;
+  try {
+    await deleteDoc(doc(db, "news", id));
+    await loadNews();
+  } catch (err) {
+    alert("हटाउन सकिएन: " + err.message);
+  }
 }
 
 $("newsForm").addEventListener("submit", async e => {
   e.preventDefault();
   if (!currentUser) return;
+  
   const saveBtn = $("saveNewsBtn");
   saveBtn.disabled = true;
   message("newsMsg", "Save हुँदैछ...");
@@ -513,16 +532,23 @@ $("newsForm").addEventListener("submit", async e => {
   const title = $("newsTitle").value.trim();
   const imageUrl = validHttpUrl($("newsImage").value.trim());
   const content = $("newsContent").value.trim();
+  
   if (!title || !imageUrl || !content) {
     message("newsMsg", "शीर्षक, सही फोटो URL र समाचार सामग्री आवश्यक छ।");
-    saveBtn.disabled = false; return;
+    saveBtn.disabled = false;
+    return;
   }
 
   const id = $("editId").value;
   const data = {
-    title, category: $("newsCategory").value, status: $("newsStatus").value,
-    imageUrl, excerpt: $("newsExcerpt").value.trim(), summary: $("newsExcerpt").value.trim(),
-    content, updatedAt: serverTimestamp()
+    title,
+    category: $("newsCategory").value,
+    status: $("newsStatus").value,
+    imageUrl,
+    excerpt: $("newsExcerpt").value.trim(),
+    summary: $("newsExcerpt").value.trim(),
+    content,
+    updatedAt: serverTimestamp()
   };
 
   try {
@@ -530,15 +556,23 @@ $("newsForm").addEventListener("submit", async e => {
       await updateDoc(doc(db, "news", id), data);
       message("newsMsg", "समाचार अद्यावधिक भयो!", true);
     } else {
-      data.createdAt = serverTimestamp(); data.date = new Date().toISOString(); data.views = 0;
+      data.createdAt = serverTimestamp();
+      data.date = new Date().toISOString();
+      data.views = 0;
       await addDoc(collection(db, "news"), data);
       message("newsMsg", "नयाँ समाचार Save भयो!", true);
     }
-    resetNewsForm(); await loadNews(); setTimeout(() => showPage("news"), 1000);
-  } catch (err) { message("newsMsg", "Save हुन सकेन: " + err.message); }
-  finally { saveBtn.disabled = false; }
+    resetNewsForm();
+    await loadNews();
+    setTimeout(() => showPage("news"), 1000);
+  } catch (err) {
+    message("newsMsg", "Save हुन सकेन: " + err.message);
+  } finally {
+    saveBtn.disabled = false;
+  }
 });
 
+// ADS MANAGEMENT FUNCTION
 async function loadAds() {
   try {
     const snap = await getDoc(doc(db, "settings", "ads"));
@@ -556,18 +590,32 @@ async function loadAds() {
 
 $("adsForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const btn = $("saveAdsBtn"); btn.disabled = true; message("adsMsg", "Save हुँदैछ...");
+  const btn = $("saveAdsBtn");
+  btn.disabled = true;
+  message("adsMsg", "Save हुँदैछ...");
+
   try {
     await setDoc(doc(db, "settings", "ads"), {
-      monetag: $("adMonetag").value, header: $("adHeader").value, adSense70: $("adSense70").value,
-      companyA: $("adCompanyA").value, companyB: $("adCompanyB").value, companyC: $("adCompanyC").value,
-      footer: $("adFooter").value, sidebar: $("adSidebar").value, updatedAt: serverTimestamp()
+      monetag: $("adMonetag").value,
+      header: $("adHeader").value,
+      adSense70: $("adSense70").value,
+      companyA: $("adCompanyA").value,
+      companyB: $("adCompanyB").value,
+      companyC: $("adCompanyC").value,
+      footer: $("adFooter").value,
+      sidebar: $("adSidebar").value,
+      updatedAt: serverTimestamp()
     }, { merge: true });
+    
     message("adsMsg", "विज्ञापन सेटिङ सफलतापुर्वक Save भयो!", true);
-  } catch (err) { message("adsMsg", "Save असफल: " + err.message); }
-  finally { btn.disabled = false; }
+  } catch (err) { 
+    message("adsMsg", "Save असफल: " + err.message); 
+  } finally {
+    btn.disabled = false;
+  }
 });
 
+// PAGES MANAGEMENT FUNCTION
 async function loadPageContent() {
   const slug = $("pageSlug").value;
   try {
@@ -575,41 +623,60 @@ async function loadPageContent() {
     const d = snap.exists() ? snap.data() : {};
     $("pageTitle").value = d.title || "";
     $("pageContent").value = d.content || "";
-  } catch (err) { message("pagesMsg", err.message); }
+  } catch (err) { message("pagesMsg", "पेज लोड भएन: " + err.message); }
 }
 $("pageSlug").addEventListener("change", loadPageContent);
 
 $("pagesForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const btn = $("savePagesBtn"); btn.disabled = true; message("pagesMsg", "Save हुँदैछ...");
+  const btn = $("savePagesBtn");
+  btn.disabled = true;
+  message("pagesMsg", "Save हुँदैछ...");
+
   try {
     await setDoc(doc(db, "pages", $("pageSlug").value), {
-      title: $("pageTitle").value.trim(), content: $("pageContent").value.trim(), updatedAt: serverTimestamp()
+      title: $("pageTitle").value.trim(),
+      content: $("pageContent").value.trim(),
+      updatedAt: serverTimestamp()
     }, { merge: true });
+    
     message("pagesMsg", "पेज सामग्री Save भयो!", true);
-  } catch (err) { message("pagesMsg", "Save असफल: " + err.message); }
-  finally { btn.disabled = false; }
+  } catch (err) { 
+    message("pagesMsg", "Save असफल: " + err.message); 
+  } finally {
+    btn.disabled = false;
+  }
 });
 
+// WEBSITE SETTINGS FUNCTION
 async function loadSettings() {
   try {
     const snap = await getDoc(doc(db, "settings", "site"));
     const d = snap.exists() ? snap.data() : {};
     $("siteName").value = d.siteName || "DailySelibreti";
     $("siteLogo").value = d.logo || "";
-  } catch (err) { message("settingsMsg", err.message); }
+  } catch (err) { message("settingsMsg", "Settings लोड भएन: " + err.message); }
 }
 
 $("settingsForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const btn = $("saveSettingsBtn"); btn.disabled = true; message("settingsMsg", "Save हुँदैछ...");
+  const btn = $("saveSettingsBtn");
+  btn.disabled = true;
+  message("settingsMsg", "Save हुँदैछ...");
+
   try {
     await setDoc(doc(db, "settings", "site"), {
-      siteName: $("siteName").value.trim(), logo: validHttpUrl($("siteLogo").value.trim()), updatedAt: serverTimestamp()
+      siteName: $("siteName").value.trim(),
+      logo: validHttpUrl($("siteLogo").value.trim()),
+      updatedAt: serverTimestamp()
     }, { merge: true });
+    
     message("settingsMsg", "वेबसाइट सेटिङ Save भयो!", true);
-  } catch (err) { message("settingsMsg", "Save असफल: " + err.message); }
-  finally { btn.disabled = false; }
+  } catch (err) { 
+    message("settingsMsg", "Save असफल: " + err.message); 
+  } finally {
+    btn.disabled = false;
+  }
 });
 </script>
 </body>
