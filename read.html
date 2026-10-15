@@ -278,7 +278,7 @@ h1{
       <!-- Top Small Ad Banner -->
       <div class="top-ad-banner">
         <span class="ad-label">Advertisement</span>
-        <div class="ad-slot" id="topAdSlot"> </div>
+        <div class="ad-slot" id="topAdSlot"></div>
       </div>
 
       <!-- Main Topic / Title -->
@@ -356,7 +356,7 @@ h1{
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment,setDoc} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
@@ -382,7 +382,33 @@ function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new 
 
 let globalAds = {};
 
-function executeScriptTags(container) {
+async function getUserCountry() {
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    if (res.ok) {
+      const data = await res.json();
+      return data.country_name || "Unknown";
+    }
+  } catch(e) {
+    console.error("Country Fetch Error:", e);
+  }
+  return "Unknown";
+}
+
+// विज्ञापन कति पटक देखियो (Impression) रेकर्ड गर्ने फंक्सन
+async function trackAdImpression(db, adType) {
+  try {
+    const adRef = doc(db, "settings", "adStats");
+    await setDoc(adRef, {
+      [adType]: increment(1),
+      totalImpressions: increment(1)
+    }, { merge: true });
+  } catch (e) {
+    console.error("Ad Impression Track Error:", e);
+  }
+}
+
+function executeScriptTags(container, db) {
   const scripts = container.querySelectorAll("script");
   scripts.forEach(oldScript => {
     const newScript = document.createElement("script");
@@ -391,10 +417,13 @@ function executeScriptTags(container) {
       newScript.appendChild(document.createTextNode(oldScript.innerHTML));
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
+    
+    // विज्ञापन लोड भएपछि काउन्ट बढाउने
+    trackAdImpression(db, "customAdSlot");
   });
 }
 
-function loadMonetagAd(code) {
+function loadMonetagAd(code, db) {
   if (!code) return;
   const div = document.createElement('div');
   div.innerHTML = code;
@@ -409,9 +438,12 @@ function loadMonetagAd(code) {
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
   });
+
+  // Monetag विज्ञापन लोड भएको ट्र्याक गर्ने
+  trackAdImpression(db, "monetag");
 }
 
-function renderTextWithAdsAndPhotos(text){
+function renderTextWithAdsAndPhotos(text, db){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
@@ -463,6 +495,7 @@ function renderTextWithAdsAndPhotos(text){
         const currentAd = sequenceAds[adSequenceIndex % sequenceAds.length];
 
         if (currentAd) {
+          trackAdImpression(db, "inArticleAd");
           htmlOutput += `
             <div class="auto-ad-banner">
               <span class="ad-tag">Advertisement / विज्ञापन</span>
@@ -513,7 +546,7 @@ async function load(){
      if (adSnap.exists()) {
        globalAds = adSnap.data();
        if (globalAds.monetag) {
-         loadMonetagAd(globalAds.monetag);
+         loadMonetagAd(globalAds.monetag, db);
        }
      }
    } catch(err) {
@@ -528,13 +561,40 @@ async function load(){
     if(["published","publish"].includes(String(p.status||"").toLowerCase().trim())){
       post=p;
       try {
-        await updateDoc(docRef, { views: increment(1) });
+        const userCountry = await getUserCountry();
+        const safeCountryKey = userCountry.replace(/[./[\]#$]/g, "_");
+
+        const updateObj = { views: increment(1) };
+        updateObj[`countries.${safeCountryKey}`] = increment(1);
+
+        await updateDoc(docRef, updateObj);
         post.views = (post.views || 0) + 1;
-      } catch(e) { post.views = (post.views || 0) + 1; }
+      } catch(e) { 
+        console.error("View/Country count update error:", e);
+        post.views = (post.views || 0) + 1; 
+      }
     }
    }
    const list=await getDocs(collection(db,"news"));
    all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
+
+   // Page लोड हुँदा Ad Impression रेकर्ड गर्ने
+   trackAdImpression(db, "pageViewsWithAds");
+
+   const topAdElem = $("topAdSlot");
+   if (globalAds && globalAds.header) {
+     topAdElem.innerHTML = globalAds.header;
+     executeScriptTags(topAdElem, db);
+     trackAdImpression(db, "headerAd");
+   } else {
+     topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+   }
+
+   const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
+   const contentElem = $("content");
+   contentElem.innerHTML = renderTextWithAdsAndPhotos(raw, db);
+   executeScriptTags(contentElem, db);
+
  }catch(e){console.error(e);}
 
  if(!post){
@@ -552,14 +612,6 @@ async function load(){
  $("caption").textContent=post.imageCaption||post.imageCredit||"";
  $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
 
- const topAdElem = $("topAdSlot");
- if (globalAds && globalAds.header) {
-   topAdElem.innerHTML = globalAds.header;
-   executeScriptTags(topAdElem);
- } else {
-   topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
- }
-
  const src=safeImage(post);
  if(src){
    $("cover").src=src;
@@ -568,15 +620,8 @@ async function load(){
    $("coverWrap").hidden=true;
  }
 
- const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
- 
- const contentElem = $("content");
- contentElem.innerHTML = renderTextWithAdsAndPhotos(raw);
- executeScriptTags(contentElem);
-
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
- // EXACT Post Permalink Structure
  const postFullUrl = "https://www.dailyselibreti.com/read.html?id=" + encodeURIComponent(post.id);
  const currentUrl = encodeURIComponent(postFullUrl);
  const shareText = encodeURIComponent(post.title || "");
