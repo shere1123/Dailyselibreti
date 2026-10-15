@@ -7,6 +7,12 @@
 <title>DailySelibreti — News, Movies & Celebrity</title>
 <meta name="description" content="DailySelibreti latest movie, celebrity, health and world news.">
 <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+<!-- 🚀 MONETAG AD SCRIPTS -->
+<script src="https://5gvci.com/act/files/tag.min.js?z=12016663" data-cfasync="false" async></script>
+<script>(function(s){s.dataset.zone='12016664',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+<script src="https://5gvci.com/act/files/tag.min.js?z=12016665" data-cfasync="false" async></script>
+
 <style>
 :root{--red:#e50925;--dark:#151515;--ink:#222;--muted:#7b7b7b;--bg:#f5f5f5;--line:#e8e8e8}
 *{box-sizing:border-box}
@@ -48,7 +54,6 @@ button{cursor:pointer}
 .breaking strong{background:var(--red);color:white;padding:6px 10px;font-size:11px;white-space:nowrap}
 .breaking span{padding:6px 10px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* Compact Banner Ad Styling */
 .main-top-ad{
   margin:8px 0 14px;
   background:#fff;
@@ -97,7 +102,6 @@ button{cursor:pointer}
 .excerpt{font-size:12px;color:#6f6f6f;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .read{display:inline-block;color:var(--red);font-size:12px;font-weight:800;margin-top:9px}
 
-/* In-Feed & Bottom Banner Styling */
 .feed-ad-banner{margin:20px 0;background:#fff;border:1px solid var(--line);padding:8px 10px;text-align:center;border-radius:3px;overflow:hidden;}
 
 .state{grid-column:1/-1;background:white;padding:26px;text-align:center;border:1px dashed #ccc;color:#666}
@@ -184,7 +188,6 @@ button{cursor:pointer}
 <main class="wrap">
  <div class="breaking"><strong>BREAKING</strong><span id="breakingText">DailySelibreti मा नवीनतम समाचार पढ्नुहोस्।</span></div>
 
- <!-- १. Header Ad Slot (शीर्षमा रहने विज्ञापन) -->
  <div class="main-top-ad">
   <span class="ad-label">Advertisement</span>
   <div class="ad-slot" id="headerAdSlot">[ Small Header Ad Banner ]</div>
@@ -204,7 +207,6 @@ button{cursor:pointer}
   <div class="grid" id="newsGrid"></div>
  </section>
 
- <!-- २. In-Feed Ad Slot (समाचार सूचीको बिचमा रहने विज्ञापन) -->
  <div class="feed-ad-banner">
   <span class="ad-label">Advertisement</span>
   <div class="ad-slot" id="inlineAdSlot">[ Small In-Feed Ad Banner ]</div>
@@ -217,7 +219,6 @@ button{cursor:pointer}
 
  <div id="categorySections"></div>
 
- <!-- ३. Bottom / Footer Ad Slot (पेजको तल्लो भागमा रहने विज्ञापन) -->
  <div class="feed-ad-banner" style="margin-top:30px;">
   <span class="ad-label">Advertisement</span>
   <div class="ad-slot" id="footerAdSlot">[ Footer / Bottom Ad Banner ]</div>
@@ -270,7 +271,12 @@ function title(p){return String(p.title||"Untitled News");}
 function desc(p){return String(p.excerpt||p.summary||p.description||"");}
 function pic(p){let s=String(p.imageUrl||p.image||"");return /^https?:\/\/[^\s"'<>]+$/i.test(s)?s:"";}
 function date(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new Date(v):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}):"DailySelibreti";}
-function link(p){return "read.html?id="+encodeURIComponent(p.id);}
+
+// यो फंक्सनले हरेक पोस्टको लागि सहि read.html?id=... लिङ्क तयार गर्छ
+function link(p){
+  return "https://dailyselibreti.com/read.html?id=" + encodeURIComponent(p.id);
+}
+
 function image(p){return pic(p)?`<img src="${esc(pic(p))}" alt="${esc(title(p))}" loading="lazy">`:'<div style="height:180px;background:#eee;display:grid;place-items:center">📰</div>';}
 function card(p){return `<article class="card"><a class="card-img" href="${link(p)}">${image(p)}</a><div class="card-body"><div class="card-cat">${esc(category(p))}</div><h3><a href="${link(p)}">${esc(title(p))}</a></h3><div class="excerpt">${esc(desc(p))}</div><div class="meta">${esc(date(p))}</div><a class="read" href="${link(p)}">READ FULL STORY →</a></div></article>`;}
 function empty(s){return `<div class="state">${esc(s)}</div>`;}
@@ -322,12 +328,9 @@ $("searchInput").oninput=e=>{if(e.target.value.trim().length>=2)search(e.target.
 $("clearSearch").onclick=e=>{e.preventDefault();$("searchInput").value="";home();};
 $("showAll").onclick=e=>{e.preventDefault();home();};
 
-// विज्ञापन इन्सर्ट गर्ने र Script Tags एक्जिक्युट गराउने सुरक्षित फंक्सन
 function setAdContent(container, htmlCode) {
   if (!container || !htmlCode) return;
   container.innerHTML = htmlCode;
-  
-  // HTML भित्र Script ट्यागहरू भएमा त्यसलाई पुनः सिर्जना गरेर रन गराउने
   const scripts = container.querySelectorAll("script");
   scripts.forEach(oldScript => {
     const newScript = document.createElement("script");
@@ -339,55 +342,26 @@ function setAdContent(container, htmlCode) {
   });
 }
 
-// Monetag काे कोड स्वचालित रूपमा लोड गराउने फंक्सन
-function loadMonetagAd(code) {
-  if (!code) return;
-  const div = document.createElement('div');
-  div.innerHTML = code;
-  document.body.appendChild(div);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const scripts = div.querySelectorAll("script");
-  scripts.forEach(oldScript => {
-    const newScript = document.createElement("script");
-    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-    if (oldScript.innerHTML) {
-      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
-    }
-    oldScript.parentNode.replaceChild(newScript, oldScript);
-  });
-}
-
-// Firestore बाट विज्ञापन (Ads) लोड गर्ने
-async function loadAdsFromFirestore(db){
- try{
-  const snap=await getDoc(doc(db,"settings","ads"));
-  if(snap.exists()){
-   const data=snap.data();
-   
-   // १. Header Ad (adHeader/header)
-   const headerCode = data.header || data.adHeader || "";
-   if(headerCode) setAdContent($("headerAdSlot"), headerCode);
-
-   // २. In-Feed Ad (companyA वा inline)
-   const inlineCode = data.inline || data.companyA || data.promo || "";
-   if(inlineCode) setAdContent($("inlineAdSlot"), inlineCode);
-
-   // ३. Footer/Bottom Ad (footer/adFooter)
-   const footerCode = data.footer || data.adFooter || data.companyB || "";
-   if(footerCode) setAdContent($("footerAdSlot"), footerCode);
-
-   // ४. Monetag Ad (monetag)
-   if(data.monetag) {
-     loadMonetagAd(data.monetag);
-   }
+async function loadAdsInstantly() {
+ try {
+  const snap = await getDoc(doc(db, "settings", "ads"));
+  if (snap.exists()) {
+   const data = snap.data();
+   if(data.header || data.adHeader) setAdContent($("headerAdSlot"), data.header || data.adHeader);
+   if(data.inline || data.companyA) setAdContent($("inlineAdSlot"), data.inline || data.companyA);
+   if(data.footer || data.adFooter) setAdContent($("footerAdSlot"), data.footer || data.adFooter);
   }
- }catch(e){
+ } catch(e) {
   console.error("Ads load error:", e);
  }
 }
 
+loadAdsInstantly();
+
 async function start(){
- const app=initializeApp(firebaseConfig),db=getFirestore(app);
  try{
   const snap=await getDocs(collection(db,"news"));
   posts=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim())).sort((a,b)=>{
@@ -399,9 +373,6 @@ async function start(){
  }
  $("breakingText").textContent=posts.length?title(posts[0]):"DailySelibreti मा स्वागत छ।";
  buildCategories();home();
- 
- // विज्ञापन लोड गर्ने फङ्सन
- loadAdsFromFirestore(db);
 }
 start();
 </script>
