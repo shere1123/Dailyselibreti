@@ -382,20 +382,29 @@ function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new 
 
 let globalAds = {};
 
+// सुरक्षित र भरपर्दो (Dual API) कन्ट्री डिटेक्टिङ फंक्सन
 async function getUserCountry() {
   try {
     const res = await fetch("https://ipapi.co/json/");
     if (res.ok) {
       const data = await res.json();
-      return data.country_name || "Unknown";
+      if (data.country_name) return data.country_name;
     }
-  } catch(e) {
-    console.error("Country Fetch Error:", e);
-  }
-  return "Unknown";
+  } catch(e) {}
+
+  try {
+    const res2 = await fetch("https://ipapi.co/json/"); // Fallback
+    const resAlt = await fetch("https://ip-api.com/json/");
+    if (resAlt.ok) {
+      const data2 = await resAlt.json();
+      if (data2.country) return data2.country;
+    }
+  } catch(e) {}
+
+  return "Nepal";
 }
 
-// विज्ञापन कति पटक देखियो (Impression) रेकर्ड गर्ने फंक्सन
+// विज्ञापन इम्प्रेशन काउन्ट गर्ने फंक्सन
 async function trackAdImpression(db, adType) {
   try {
     const adRef = doc(db, "settings", "adStats");
@@ -417,8 +426,6 @@ function executeScriptTags(container, db) {
       newScript.appendChild(document.createTextNode(oldScript.innerHTML));
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
-    
-    // विज्ञापन लोड भएपछि काउन्ट बढाउने
     trackAdImpression(db, "customAdSlot");
   });
 }
@@ -438,8 +445,6 @@ function loadMonetagAd(code, db) {
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
   });
-
-  // Monetag विज्ञापन लोड भएको ट्र्याक गर्ने
   trackAdImpression(db, "monetag");
 }
 
@@ -578,7 +583,6 @@ async function load(){
    const list=await getDocs(collection(db,"news"));
    all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
 
-   // Page लोड हुँदा Ad Impression रेकर्ड गर्ने
    trackAdImpression(db, "pageViewsWithAds");
 
    const topAdElem = $("topAdSlot");
