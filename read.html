@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#ffffff">
 <title>Read News | DailySelibreti</title>
 
-<!-- Dynamic Open Graph Meta Tags -->
+<!-- Open Graph Meta Tags (Default Fallback) -->
 <meta property="og:type" content="article">
 <meta property="og:title" id="ogTitle" content="DailySelibreti News">
 <meta property="og:description" id="ogDesc" content="ताजा समाचार र मनोरञ्जनका खबरहरू">
-<meta property="og:image" id="ogImage" content="">
-<meta property="og:url" id="ogUrl" content="">
+<meta property="og:image" id="ogImage" content="https://www.dailyselibreti.com/logo.png">
+<meta property="og:url" id="ogUrl" content="https://www.dailyselibreti.com">
 
 <!-- Google Nepali News Fonts (Mukta & Noto Sans Devanagari) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -394,7 +394,6 @@ function executeScriptTags(container) {
   });
 }
 
-// Monetag काे कोड स्वचालित रूपमा लोड गराउने फंक्सन
 function loadMonetagAd(code) {
   if (!code) return;
   const div = document.createElement('div');
@@ -416,7 +415,6 @@ function renderTextWithAdsAndPhotos(text){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
-  // <img ...> ट्याग वा नयाँ लाइनहरू विभाजन गर्ने
   const blocks = cleanStr.split(/(<img[^>]*>|\n+)/i).map(b => b.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
@@ -432,7 +430,6 @@ function renderTextWithAdsAndPhotos(text){
   const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
   blocks.forEach((block) => {
-    // १. यदि एडमिन प्यानलबाट हालिएको <img> ट्याग हो भने (Full screen Container भित्र राख्ने)
     if (/^<img[^>]*>$/i.test(block)) {
       htmlOutput += `
         <div class="article-inline-img-wrap">
@@ -442,7 +439,6 @@ function renderTextWithAdsAndPhotos(text){
       return;
     }
 
-    // २. यदि पुरानो [PHOTO: URL] ढाँचा हो भने
     const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     if (photoMatch) {
       const imgUrl = photoMatch[1];
@@ -454,7 +450,6 @@ function renderTextWithAdsAndPhotos(text){
       return;
     }
 
-    // ३. साधारण टेक्स्ट र विज्ञापन मिलाउने
     const lines = block.split(/\n+/);
     lines.forEach(line => {
       if(!line.trim()) return;
@@ -503,7 +498,11 @@ function updateMetaTags(post, url){
 async function load(){
  const params=new URLSearchParams(location.search);
  const id=params.get("id");
- if(!id){$("pageState").textContent="समाचार ID भेटिएन। Home पेजमा फर्कनुहोस्।";return;}
+ 
+ if(!id || id === "null" || id === "undefined"){
+    $("pageState").textContent="समाचार ID भेटिएन। Home पेजमा फर्कनुहोस्।";
+    return;
+ }
 
  let post=null,all=[];
  try{
@@ -513,8 +512,6 @@ async function load(){
      const adSnap = await getDoc(doc(db, "settings", "ads"));
      if (adSnap.exists()) {
        globalAds = adSnap.data();
-       
-       // Monetag Ad लोड गर्ने
        if (globalAds.monetag) {
          loadMonetagAd(globalAds.monetag);
        }
@@ -540,7 +537,10 @@ async function load(){
    all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
  }catch(e){console.error(e);}
 
- if(!post){$("pageState").textContent="यो समाचार भेटिएन वा प्रकाशित गरिएको छैन। Home मा फर्केर अर्को समाचार खोल्नुहोस्।";return;}
+ if(!post){
+   $("pageState").textContent="यो समाचार भेटिएन वा प्रकाशित गरिएको छैन। Home मा फर्केर अर्को समाचार खोल्नुहोस्।";
+   return;
+ }
 
  updateMetaTags(post, location.href);
 
@@ -572,12 +572,12 @@ async function load(){
  
  const contentElem = $("content");
  contentElem.innerHTML = renderTextWithAdsAndPhotos(raw);
- 
  executeScriptTags(contentElem);
 
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
- const postFullUrl = window.location.origin + window.location.pathname + "?id=" + encodeURIComponent(post.id);
+ // EXACT Post Permalink Structure
+ const postFullUrl = "https://www.dailyselibreti.com/read.html?id=" + encodeURIComponent(post.id);
  const currentUrl = encodeURIComponent(postFullUrl);
  const shareText = encodeURIComponent(post.title || "");
 
