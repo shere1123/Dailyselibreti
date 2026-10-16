@@ -215,8 +215,9 @@ td{color:#eee}
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:8px;">
               <label style="margin-bottom:0">समाचारको पूरा सामग्री *</label>
               <div>
+                <button type="button" id="insertHeadingBtn" class="btn secondary" style="padding:4px 10px; font-size:13px; background:#222;">📌 हेडिङ</button>
                 <button type="button" id="insertContentImageBtn" class="btn secondary" style="padding:4px 10px; font-size:13px;">📷 बीचमा फोटो</button>
-                <button type="button" id="insertYoutubeBtn" class="btn secondary" style="padding:4px 10px; font-size:13px; background:#b31217;">🎥 बीचमा YouTube भिडियो</button>
+                <button type="button" id="insertYoutubeBtn" class="btn secondary" style="padding:4px 10px; font-size:13px; background:#b31217;">🎥 बीचमा YouTube</button>
               </div>
             </div>
             <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्..."></textarea>
@@ -365,6 +366,21 @@ function showPage(name) {
 document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
 
+// हेडिङ बनाउने बटन (Heading Button)
+$("insertHeadingBtn").addEventListener("click", () => {
+  const textarea = $("newsContent");
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const selectedText = textarea.value.substring(start, end);
+  
+  const replacement = `<h2>${selectedText || "यहाँ हेडिङ लेख्नुहोस्"}</h2>`;
+  
+  textarea.value = textarea.value.substring(0, start) + replacement + textarea.value.substring(end);
+  textarea.focus();
+  textarea.selectionStart = start + 4;
+  textarea.selectionEnd = start + 4 + (selectedText.length || 23);
+});
+
 // फोटो राख्ने बटन
 $("insertContentImageBtn").addEventListener("click", () => {
   const imgUrl = prompt("फोटोको Direct URL यहाँ हाल्नुहोस्:");
@@ -384,7 +400,7 @@ $("insertContentImageBtn").addEventListener("click", () => {
   textarea.selectionStart = textarea.selectionEnd = start + tag.length;
 });
 
-// युट्युब भिडियो राख्ने नयाँ बटन
+// युट्युब भिडियो राख्ने बटन
 $("insertYoutubeBtn").addEventListener("click", () => {
   const ytUrl = prompt("युट्युब भिडियोको लिङ्क (URL) यहाँ हाल्नुहोस्:\n(जस्तै: https://www.youtube.com/watch?v=...)");
   if (!ytUrl) return;
@@ -610,33 +626,6 @@ async function loadAds() {
   } catch (err) { message("adsMsg", err.message); }
 }
 
-$("adsForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const btn = $("saveAdsBtn");
-  btn.disabled = true;
-  message("adsMsg", "Save हुँदैछ...");
-
-  try {
-    await setDoc(doc(db, "settings", "ads"), {
-      monetag: $("adMonetag").value,
-      header: $("adHeader").value,
-      adSense70: $("adSense70").value,
-      companyA: $("adCompanyA").value,
-      companyB: $("adCompanyB").value,
-      companyC: $("adCompanyC").value,
-      footer: $("adFooter").value,
-      sidebar: $("adSidebar").value,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    
-    message("adsMsg", "विज्ञापन सेटिङ सफलतापुर्वक Save भयो!", true);
-  } catch (err) { 
-    message("adsMsg", "Save असफल: " + err.message); 
-  } finally {
-    btn.disabled = false;
-  }
-});
-
 async function loadPageContent() {
   const slug = $("pageSlug").value;
   try {
@@ -648,27 +637,6 @@ async function loadPageContent() {
 }
 $("pageSlug").addEventListener("change", loadPageContent);
 
-$("pagesForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const btn = $("savePagesBtn");
-  btn.disabled = true;
-  message("pagesMsg", "Save हुँदैछ...");
-
-  try {
-    await setDoc(doc(db, "pages", $("pageSlug").value), {
-      title: $("pageTitle").value.trim(),
-      content: $("pageContent").value.trim(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    
-    message("pagesMsg", "पेज सामग्री Save भयो!", true);
-  } catch (err) { 
-    message("pagesMsg", "Save असफल: " + err.message); 
-  } finally {
-    btn.disabled = false;
-  }
-});
-
 async function loadSettings() {
   try {
     const snap = await getDoc(doc(db, "settings", "site"));
@@ -677,27 +645,6 @@ async function loadSettings() {
     $("siteLogo").value = d.logo || "";
   } catch (err) { message("settingsMsg", "Settings लोड भएन: " + err.message); }
 }
-
-$("settingsForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const btn = $("saveSettingsBtn");
-  btn.disabled = true;
-  message("settingsMsg", "Save हुँदैछ...");
-
-  try {
-    await setDoc(doc(db, "settings", "site"), {
-      siteName: $("siteName").value.trim(),
-      logo: validHttpUrl($("siteLogo").value.trim()),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    
-    message("settingsMsg", "वेबसाइट सेटिङ Save भयो!", true);
-  } catch (err) { 
-    message("settingsMsg", "Save असफल: " + err.message); 
-  } finally {
-    btn.disabled = false;
-  }
-});
 </script>
 </body>
 </html>
