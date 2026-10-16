@@ -104,7 +104,7 @@ h1{
 }
 .meta-item{display:inline-flex;align-items:center;gap:5px}
 
-/* Full Bleed Cover Photo & Inline Wrappers */
+/* Full Bleed Cover Photo & Inline Photo/Video Wrapper */
 .cover-container, .article-inline-img-wrap, .article-inline-video-wrap {
   width: 100vw;
   position: relative;
@@ -169,7 +169,7 @@ h1{
   border: 0;
 }
 
-/* Film Names / Subheadings Styling (h2, h3) */
+/* Subheadings / Film Names Styling (h2, h3) */
 .content h2, .content h3{
   font-size: 24px;
   line-height: 1.4;
@@ -462,7 +462,6 @@ function renderTextWithAdsAndPhotos(text, db){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
-  // HTML ट्यागहरू (जस्तै <h2>...</h2>, <img ...>) र सामान्य टेक्स्टलाई अलग-अलग छुट्याउने
   const blocks = cleanStr.split(/(<h[23][^>]*>.*?<\/h[23]>|<img[^>]*>|\n+)/is).map(b => b.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
@@ -478,13 +477,11 @@ function renderTextWithAdsAndPhotos(text, db){
   const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
   blocks.forEach((block) => {
-    // 1. यदि Heading ट्याग छ भने सिधै रेन्डर गर्ने
     if (/^<h[23][^>]*>.*?<\/h[23]>$/i.test(block)) {
       htmlOutput += block;
       return;
     }
 
-    // 2. Image Tags Support
     if (/^<img[^>]*>$/i.test(block)) {
       htmlOutput += `
         <div class="article-inline-img-wrap">
@@ -494,7 +491,6 @@ function renderTextWithAdsAndPhotos(text, db){
       return;
     }
 
-    // 3. Custom Photo Tag Support ([PHOTO: url])
     const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     if (photoMatch) {
       const imgUrl = photoMatch[1];
@@ -506,7 +502,6 @@ function renderTextWithAdsAndPhotos(text, db){
       return;
     }
 
-    // 4. Full Screen YouTube Video Tag Support ([YOUTUBE: url])
     const ytMatch = block.match(/^\[YOUTUBE:\s*(https?:\/\/[^\s]+)\]$/i);
     if (ytMatch) {
       const ytUrl = ytMatch[1];
