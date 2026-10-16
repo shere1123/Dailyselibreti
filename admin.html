@@ -611,6 +611,33 @@ $("newsForm").addEventListener("submit", async e => {
   }
 });
 
+// ================= ADS SAVE FUNCTIONALITY =================
+$("adsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser) return;
+  const btn = $("saveAdsBtn");
+  btn.disabled = true;
+  message("adsMsg", "विज्ञापन Save हुँदैछ...");
+  try {
+    await setDoc(doc(db, "settings", "ads"), {
+      monetag: $("adMonetag").value.trim(),
+      header: $("adHeader").value.trim(),
+      adSense70: $("adSense70").value.trim(),
+      companyA: $("adCompanyA").value.trim(),
+      companyB: $("adCompanyB").value.trim(),
+      companyC: $("adCompanyC").value.trim(),
+      footer: $("adFooter").value.trim(),
+      sidebar: $("adSidebar").value.trim(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    message("adsMsg", "विज्ञापन सफलतापूर्वक Save भयो!", true);
+  } catch (err) {
+    message("adsMsg", "Save गर्न असफल: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 async function loadAds() {
   try {
     const snap = await getDoc(doc(db, "settings", "ads"));
@@ -626,6 +653,28 @@ async function loadAds() {
   } catch (err) { message("adsMsg", err.message); }
 }
 
+// ================= PAGES SAVE FUNCTIONALITY =================
+$("pagesForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser) return;
+  const slug = $("pageSlug").value;
+  const btn = $("savePagesBtn");
+  btn.disabled = true;
+  message("pagesMsg", "पेज Save हुँदैछ...");
+  try {
+    await setDoc(doc(db, "pages", slug), {
+      title: $("pageTitle").value.trim(),
+      content: $("pageContent").value.trim(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    message("pagesMsg", "पेज सफलतापूर्वक Save भयो!", true);
+  } catch (err) {
+    message("pagesMsg", "पेज Save असफल: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 async function loadPageContent() {
   const slug = $("pageSlug").value;
   try {
@@ -636,6 +685,27 @@ async function loadPageContent() {
   } catch (err) { message("pagesMsg", "पेज लोड भएन: " + err.message); }
 }
 $("pageSlug").addEventListener("change", loadPageContent);
+
+// ================= SETTINGS SAVE FUNCTIONALITY =================
+$("settingsForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!currentUser) return;
+  const btn = $("saveSettingsBtn");
+  btn.disabled = true;
+  message("settingsMsg", "Settings Save हुँदैछ...");
+  try {
+    await setDoc(doc(db, "settings", "site"), {
+      siteName: $("siteName").value.trim(),
+      logo: validHttpUrl($("siteLogo").value.trim()),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    message("settingsMsg", "Settings सफलतापूर्वक Save भयो!", true);
+  } catch (err) {
+    message("settingsMsg", "Settings Save असफल: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
 
 async function loadSettings() {
   try {
