@@ -395,26 +395,6 @@ function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new 
 
 let globalAds = {};
 
-async function getUserCountry() {
-  try {
-    const res = await fetch("https://ipapi.co/json/");
-    if (res.ok) {
-      const data = await res.json();
-      if (data.country_name) return data.country_name;
-    }
-  } catch(e) {}
-
-  try {
-    const resAlt = await fetch("https://ip-api.com/json/");
-    if (resAlt.ok) {
-      const data2 = await resAlt.json();
-      if (data2.country) return data2.country;
-    }
-  } catch(e) {}
-
-  return "Nepal";
-}
-
 async function trackAdImpression(db, adType) {
   try {
     const adRef = doc(db, "settings", "adStats");
@@ -605,16 +585,10 @@ async function load(){
     if(["published","publish"].includes(String(p.status||"").toLowerCase().trim())){
       post=p;
       try {
-        const userCountry = await getUserCountry();
-        const safeCountryKey = userCountry.replace(/[./[\]#$]/g, "_");
-
-        const updateObj = { views: increment(1) };
-        updateObj[`countries.${safeCountryKey}`] = increment(1);
-
-        await updateDoc(docRef, updateObj);
+        await updateDoc(docRef, { views: increment(1) });
         post.views = (post.views || 0) + 1;
       } catch(e) { 
-        console.error("View/Country count update error:", e);
+        console.error("View count update error:", e);
         post.views = (post.views || 0) + 1; 
       }
     }
