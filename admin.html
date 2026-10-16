@@ -212,11 +212,14 @@ td{color:#eee}
             <textarea id="newsExcerpt" maxlength="1000" placeholder="समाचारको छोटो परिचय..."></textarea>
           </div>
           <div class="field full">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:8px;">
               <label style="margin-bottom:0">समाचारको पूरा सामग्री *</label>
-              <button type="button" id="insertContentImageBtn" class="btn secondary" style="padding:4px 10px; font-size:13px;">📷 बीचमा फोटो राख्नुहोस्</button>
+              <div>
+                <button type="button" id="insertContentImageBtn" class="btn secondary" style="padding:4px 10px; font-size:13px;">📷 बीचमा फोटो</button>
+                <button type="button" id="insertYoutubeBtn" class="btn secondary" style="padding:4px 10px; font-size:13px; background:#b31217;">🎥 बीचमा YouTube भिडियो</button>
+              </div>
             </div>
-            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्... (जहाँ फोटो राख्नु छ, त्यहाँ कर्सर राखेर माथिको बटन थिच्नुहोस्)"></textarea>
+            <textarea id="newsContent" required style="min-height:280px" placeholder="पूरा समाचार यहाँ लेख्नुहोस्..."></textarea>
           </div>
         </div>
         <button class="btn" type="submit" id="saveNewsBtn">Save गर्नुहोस्</button>
@@ -303,7 +306,7 @@ td{color:#eee}
           <input id="siteLogo" type="url" placeholder="https://example.com/logo.png">
         </div>
         <button class="btn" type="submit" id="saveSettingsBtn">Settings Save गर्नुहोस्</button>
-        <div id="settingsMsg" class="msg">कोषहरू सुरक्षित गर्नुहोस्</div>
+        <div id="settingsMsg" class="msg"></div>
       </form>
     </section>
   </main>
@@ -362,15 +365,35 @@ function showPage(name) {
 document.querySelectorAll(".nav").forEach(b => b.addEventListener("click", () => showPage(b.dataset.page)));
 document.querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => showPage(b.dataset.goto)));
 
+// फोटो राख्ने बटन
 $("insertContentImageBtn").addEventListener("click", () => {
-  const imgUrl = prompt("फोटोको Direct URL (जस्तै ImgBB वा ड्राइभको लिङ्क) यहाँ हाल्नुहोस्:");
+  const imgUrl = prompt("फोटोको Direct URL यहाँ हाल्नुहोस्:");
   if (!imgUrl) return;
   const validUrl = validHttpUrl(imgUrl.trim());
   if (!validUrl) {
-    alert("अमान्य URL! कृपया सही लिङ्क हाल्नुहोस्।");
+    alert("अमान्य URL!");
     return;
   }
-  const tag = `\n<img src="${validUrl}" alt="Photo" style="max-width:100%;height:auto;border-radius:8px;margin:10px 0;">\n`;
+  const tag = `\n[PHOTO: ${validUrl}]\n`;
+  const textarea = $("newsContent");
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  textarea.value = text.substring(0, start) + tag + text.substring(end);
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+});
+
+// युट्युब भिडियो राख्ने नयाँ बटन
+$("insertYoutubeBtn").addEventListener("click", () => {
+  const ytUrl = prompt("युट्युब भिडियोको लिङ्क (URL) यहाँ हाल्नुहोस्:\n(जस्तै: https://www.youtube.com/watch?v=...)");
+  if (!ytUrl) return;
+  const validUrl = validHttpUrl(ytUrl.trim());
+  if (!validUrl) {
+    alert("अमान्य URL!");
+    return;
+  }
+  const tag = `\n[YOUTUBE: ${validUrl}]\n`;
   const textarea = $("newsContent");
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
@@ -572,7 +595,6 @@ $("newsForm").addEventListener("submit", async e => {
   }
 });
 
-// ADS MANAGEMENT FUNCTION
 async function loadAds() {
   try {
     const snap = await getDoc(doc(db, "settings", "ads"));
@@ -615,7 +637,6 @@ $("adsForm").addEventListener("submit", async e => {
   }
 });
 
-// PAGES MANAGEMENT FUNCTION
 async function loadPageContent() {
   const slug = $("pageSlug").value;
   try {
@@ -648,7 +669,6 @@ $("pagesForm").addEventListener("submit", async e => {
   }
 });
 
-// WEBSITE SETTINGS FUNCTION
 async function loadSettings() {
   try {
     const snap = await getDoc(doc(db, "settings", "site"));
