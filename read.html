@@ -104,7 +104,7 @@ h1{
 }
 .meta-item{display:inline-flex;align-items:center;gap:5px}
 
-/* Full Bleed Cover Photo & Inline Photo Wrapper */
+/* Full Bleed Cover Photo & Inline Wrappers */
 .cover-container, .article-inline-img-wrap, .article-inline-video-wrap {
   width: 100vw;
   position: relative;
@@ -169,14 +169,21 @@ h1{
   border: 0;
 }
 
-.content h2,.content h3{
-  font-size: 25px;
+/* Film Names / Subheadings Styling (h2, h3) */
+.content h2, .content h3{
+  font-size: 24px;
   line-height: 1.4;
-  margin-top: 32px;
-  margin-bottom: 14px;
+  margin-top: 36px;
+  margin-bottom: 16px;
   font-weight: 800;
   color: #000;
   text-align: left;
+  border-left: 5px solid var(--red);
+  padding-left: 12px;
+  background: #fdfdfd;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-radius: 0 6px 6px 0;
 }
 .content a{color:var(--red);text-decoration:underline}
 
@@ -388,7 +395,6 @@ function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new 
 
 let globalAds = {};
 
-// सुरक्षित Dual API Country Detector
 async function getUserCountry() {
   try {
     const res = await fetch("https://ipapi.co/json/");
@@ -409,7 +415,6 @@ async function getUserCountry() {
   return "Nepal";
 }
 
-// विज्ञापन Impression Count गर्ने फंक्सन
 async function trackAdImpression(db, adType) {
   try {
     const adRef = doc(db, "settings", "adStats");
@@ -457,7 +462,8 @@ function renderTextWithAdsAndPhotos(text, db){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
-  const blocks = cleanStr.split(/(<img[^>]*>|\n+)/i).map(b => b.trim()).filter(Boolean);
+  // HTML ट्यागहरू (जस्तै <h2>...</h2>, <img ...>) र सामान्य टेक्स्टलाई अलग-अलग छुट्याउने
+  const blocks = cleanStr.split(/(<h[23][^>]*>.*?<\/h[23]>|<img[^>]*>|\n+)/is).map(b => b.trim()).filter(Boolean);
   
   let accumulatedWords = 0;
   let nextAdThreshold = 70;
@@ -472,7 +478,13 @@ function renderTextWithAdsAndPhotos(text, db){
   const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
   blocks.forEach((block) => {
-    // 1. Image Tags Support
+    // 1. यदि Heading ट्याग छ भने सिधै रेन्डर गर्ने
+    if (/^<h[23][^>]*>.*?<\/h[23]>$/i.test(block)) {
+      htmlOutput += block;
+      return;
+    }
+
+    // 2. Image Tags Support
     if (/^<img[^>]*>$/i.test(block)) {
       htmlOutput += `
         <div class="article-inline-img-wrap">
@@ -482,7 +494,7 @@ function renderTextWithAdsAndPhotos(text, db){
       return;
     }
 
-    // 2. Custom Photo Tag Support ([PHOTO: url])
+    // 3. Custom Photo Tag Support ([PHOTO: url])
     const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     if (photoMatch) {
       const imgUrl = photoMatch[1];
@@ -494,7 +506,7 @@ function renderTextWithAdsAndPhotos(text, db){
       return;
     }
 
-    // 3. Full Screen YouTube Video Tag Support ([YOUTUBE: url])
+    // 4. Full Screen YouTube Video Tag Support ([YOUTUBE: url])
     const ytMatch = block.match(/^\[YOUTUBE:\s*(https?:\/\/[^\s]+)\]$/i);
     if (ytMatch) {
       const ytUrl = ytMatch[1];
