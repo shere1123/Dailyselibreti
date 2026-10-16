@@ -104,17 +104,17 @@ h1{
 }
 .meta-item{display:inline-flex;align-items:center;gap:5px}
 
-/* Full Bleed Cover Photo (Main Thumbnail) */
-.cover-container{
-  width:100vw;
-  position:relative;
-  left:50%;
-  right:50%;
-  margin-left:-50vw;
-  margin-right:-50vw;
-  margin-top:15px;
-  margin-bottom:10px;
-  background:#111;
+/* Full Bleed Cover Photo & Inline Photo Wrapper */
+.cover-container, .article-inline-img-wrap, .article-inline-video-wrap {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  margin-top: 25px;
+  margin-bottom: 25px;
+  background: #111;
 }
 .cover{
   width:100%;
@@ -141,18 +141,6 @@ h1{
   letter-spacing: 0.1px;
 }
 
-/* In-Article Photos - Full Screen Width Like Cover Photo */
-.article-inline-img-wrap {
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  margin-top: 25px;
-  margin-bottom: 25px;
-  background: #111;
-}
 .article-inline-img-wrap img {
   width: 100% !important;
   max-height: 550px !important;
@@ -161,6 +149,24 @@ h1{
   border-radius: 0 !important;
   margin: 0 !important;
   box-shadow: none !important;
+}
+
+/* YouTube Video Responsive Full Bleed Container */
+.video-responsive-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+  overflow: hidden;
+  width: 100%;
+  background: #000;
+}
+.video-responsive-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .content h2,.content h3{
@@ -278,7 +284,7 @@ h1{
       <!-- Top Small Ad Banner -->
       <div class="top-ad-banner">
         <span class="ad-label">Advertisement</span>
-        <div class="ad-slot" id="topAdSlot"> </div>
+        <div class="ad-slot" id="topAdSlot"></div>
       </div>
 
       <!-- Main Topic / Title -->
@@ -356,7 +362,7 @@ h1{
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment,setDoc} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
@@ -382,7 +388,41 @@ function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new 
 
 let globalAds = {};
 
-function executeScriptTags(container) {
+// सुरक्षित Dual API Country Detector
+async function getUserCountry() {
+  try {
+    const res = await fetch("https://ipapi.co/json/");
+    if (res.ok) {
+      const data = await res.json();
+      if (data.country_name) return data.country_name;
+    }
+  } catch(e) {}
+
+  try {
+    const resAlt = await fetch("https://ip-api.com/json/");
+    if (resAlt.ok) {
+      const data2 = await resAlt.json();
+      if (data2.country) return data2.country;
+    }
+  } catch(e) {}
+
+  return "Nepal";
+}
+
+// विज्ञापन Impression Count गर्ने फंक्सन
+async function trackAdImpression(db, adType) {
+  try {
+    const adRef = doc(db, "settings", "adStats");
+    await setDoc(adRef, {
+      [adType]: increment(1),
+      totalImpressions: increment(1)
+    }, { merge: true });
+  } catch (e) {
+    console.error("Ad Impression Track Error:", e);
+  }
+}
+
+function executeScriptTags(container, db) {
   const scripts = container.querySelectorAll("script");
   scripts.forEach(oldScript => {
     const newScript = document.createElement("script");
@@ -391,10 +431,11 @@ function executeScriptTags(container) {
       newScript.appendChild(document.createTextNode(oldScript.innerHTML));
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
+    if(db) trackAdImpression(db, "customAdSlot");
   });
 }
 
-function loadMonetagAd(code) {
+function loadMonetagAd(code, db) {
   if (!code) return;
   const div = document.createElement('div');
   div.innerHTML = code;
@@ -409,9 +450,10 @@ function loadMonetagAd(code) {
     }
     oldScript.parentNode.replaceChild(newScript, oldScript);
   });
+  if(db) trackAdImpression(db, "monetag");
 }
 
-function renderTextWithAdsAndPhotos(text){
+function renderTextWithAdsAndPhotos(text, db){
   const cleanStr = String(text||"").trim();
   if(!cleanStr) return "";
 
@@ -430,6 +472,7 @@ function renderTextWithAdsAndPhotos(text){
   const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
 
   blocks.forEach((block) => {
+    // 1. Image Tags Support
     if (/^<img[^>]*>$/i.test(block)) {
       htmlOutput += `
         <div class="article-inline-img-wrap">
@@ -439,6 +482,7 @@ function renderTextWithAdsAndPhotos(text){
       return;
     }
 
+    // 2. Custom Photo Tag Support ([PHOTO: url])
     const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
     if (photoMatch) {
       const imgUrl = photoMatch[1];
@@ -448,6 +492,31 @@ function renderTextWithAdsAndPhotos(text){
         </div>
       `;
       return;
+    }
+
+    // 3. Full Screen YouTube Video Tag Support ([YOUTUBE: url])
+    const ytMatch = block.match(/^\[YOUTUBE:\s*(https?:\/\/[^\s]+)\]$/i);
+    if (ytMatch) {
+      const ytUrl = ytMatch[1];
+      let videoId = "";
+      if (ytUrl.includes("v=")) {
+        videoId = ytUrl.split("v=")[1].split("&")[0];
+      } else if (ytUrl.includes("youtu.be/")) {
+        videoId = ytUrl.split("youtu.be/")[1].split("?")[0];
+      } else if (ytUrl.includes("embed/")) {
+        videoId = ytUrl.split("embed/")[1].split("?")[0];
+      }
+
+      if (videoId) {
+        htmlOutput += `
+          <div class="article-inline-video-wrap">
+            <div class="video-responsive-container">
+              <iframe src="https://www.youtube.com/embed/${esc(videoId)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          </div>
+        `;
+        return;
+      }
     }
 
     const lines = block.split(/\n+/);
@@ -463,6 +532,7 @@ function renderTextWithAdsAndPhotos(text){
         const currentAd = sequenceAds[adSequenceIndex % sequenceAds.length];
 
         if (currentAd) {
+          if(db) trackAdImpression(db, "inArticleAd");
           htmlOutput += `
             <div class="auto-ad-banner">
               <span class="ad-tag">Advertisement / विज्ञापन</span>
@@ -513,7 +583,7 @@ async function load(){
      if (adSnap.exists()) {
        globalAds = adSnap.data();
        if (globalAds.monetag) {
-         loadMonetagAd(globalAds.monetag);
+         loadMonetagAd(globalAds.monetag, db);
        }
      }
    } catch(err) {
@@ -528,13 +598,39 @@ async function load(){
     if(["published","publish"].includes(String(p.status||"").toLowerCase().trim())){
       post=p;
       try {
-        await updateDoc(docRef, { views: increment(1) });
+        const userCountry = await getUserCountry();
+        const safeCountryKey = userCountry.replace(/[./[\]#$]/g, "_");
+
+        const updateObj = { views: increment(1) };
+        updateObj[`countries.${safeCountryKey}`] = increment(1);
+
+        await updateDoc(docRef, updateObj);
         post.views = (post.views || 0) + 1;
-      } catch(e) { post.views = (post.views || 0) + 1; }
+      } catch(e) { 
+        console.error("View/Country count update error:", e);
+        post.views = (post.views || 0) + 1; 
+      }
     }
    }
    const list=await getDocs(collection(db,"news"));
    all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
+
+   trackAdImpression(db, "pageViewsWithAds");
+
+   const topAdElem = $("topAdSlot");
+   if (globalAds && globalAds.header) {
+     topAdElem.innerHTML = globalAds.header;
+     executeScriptTags(topAdElem, db);
+     trackAdImpression(db, "headerAd");
+   } else {
+     topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+   }
+
+   const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
+   const contentElem = $("content");
+   contentElem.innerHTML = renderTextWithAdsAndPhotos(raw, db);
+   executeScriptTags(contentElem, db);
+
  }catch(e){console.error(e);}
 
  if(!post){
@@ -552,14 +648,6 @@ async function load(){
  $("caption").textContent=post.imageCaption||post.imageCredit||"";
  $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
 
- const topAdElem = $("topAdSlot");
- if (globalAds && globalAds.header) {
-   topAdElem.innerHTML = globalAds.header;
-   executeScriptTags(topAdElem);
- } else {
-   topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
- }
-
  const src=safeImage(post);
  if(src){
    $("cover").src=src;
@@ -568,15 +656,8 @@ async function load(){
    $("coverWrap").hidden=true;
  }
 
- const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
- 
- const contentElem = $("content");
- contentElem.innerHTML = renderTextWithAdsAndPhotos(raw);
- executeScriptTags(contentElem);
-
  $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
 
- // EXACT Post Permalink Structure
  const postFullUrl = "https://www.dailyselibreti.com/read.html?id=" + encodeURIComponent(post.id);
  const currentUrl = encodeURIComponent(postFullUrl);
  const shareText = encodeURIComponent(post.title || "");
