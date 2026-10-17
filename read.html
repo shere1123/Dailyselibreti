@@ -565,18 +565,6 @@ async function load(){
  try{
    const app=initializeApp(firebaseConfig),db=getFirestore(app);
 
-   try {
-     const adSnap = await getDoc(doc(db, "settings", "ads"));
-     if (adSnap.exists()) {
-       globalAds = adSnap.data();
-       if (globalAds.monetag) {
-         loadMonetagAd(globalAds.monetag, db);
-       }
-     }
-   } catch(err) {
-     console.error("Ads fetch error:", err);
-   }
-
    const docRef = doc(db,"news",id);
    const snap=await getDoc(docRef);
    
@@ -598,19 +586,39 @@ async function load(){
 
    trackAdImpression(db, "pageViewsWithAds");
 
-   const topAdElem = $("topAdSlot");
-   if (globalAds && globalAds.header) {
-     topAdElem.innerHTML = globalAds.header;
-     executeScriptTags(topAdElem, db);
-     trackAdImpression(db, "headerAd");
-   } else {
-     topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+   // Firebase बाट एड्सको डाटा ल्याउने तर विज्ञापनहरू ७ सेकेन्डपछि मात्र लोड गराउने
+   try {
+     const adSnap = await getDoc(doc(db, "settings", "ads"));
+     if (adSnap.exists()) {
+       globalAds = adSnap.data();
+       
+       // ७ सेकेन्ड (७००० मिलिसेकेन्ड) पछि विज्ञापन लोड गराउने
+       setTimeout(() => {
+         if (globalAds.monetag) {
+           loadMonetagAd(globalAds.monetag, db);
+         }
+         const topAdElem = $("topAdSlot");
+         if (globalAds && globalAds.header) {
+           topAdElem.innerHTML = globalAds.header;
+           executeScriptTags(topAdElem, db);
+           trackAdImpression(db, "headerAd");
+         } else {
+           topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+         }
+       }, 7000);
+     }
+   } catch(err) {
+     console.error("Ads fetch error:", err);
    }
 
    const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
    const contentElem = $("content");
+   // मुख्य कन्टेन्ट तुरुन्तै देखाउने, भित्रका इन-आर्टिकल एडहरू पनि ७ सेकेन्डपछि मात्र लोड हुने गरी मिलाइएको
    contentElem.innerHTML = renderTextWithAdsAndPhotos(raw, db);
-   executeScriptTags(contentElem, db);
+   
+   setTimeout(() => {
+     executeScriptTags(contentElem, db);
+   }, 7000);
 
  }catch(e){console.error(e);}
 
