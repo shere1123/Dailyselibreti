@@ -323,4 +323,342 @@ h1{
         <div class="share-title">यो समाचार शेयर गर्नुहोस्:</div>
         <div class="share-buttons">
           <button class="share-btn btn-fb" id="shareFb">
-            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </button>
+
+          <button class="share-btn btn-tw" id="shareTw">
+            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Twitter (X)
+          </button>
+
+          <button class="share-btn btn-wa" id="shareWa">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            WhatsApp
+          </button>
+
+          <button class="share-btn btn-tg" id="shareTg">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.562 8.161c-.18 1.897-.962 6.502-1.359 8.627-.168.9-.5 1.201-.82 1.23-.697.064-1.226-.461-1.901-.903-1.056-.692-1.653-1.123-2.678-1.799-1.185-.781-.417-1.21.258-1.911.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.139-5.062 3.345-.479.329-.913.489-1.302.481-.428-.008-1.252-.241-1.865-.44-.752-.244-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.831-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635.099-.002.321.023.465.141.119.098.152.228.166.321.016.111.033.351.017.545z"/></svg>
+            Telegram
+          </button>
+
+          <button class="share-btn btn-copy" id="copyBtn">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copy Link
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <aside class="sidebar">
+      <h2>RELATED NEWS</h2>
+      <div id="related"></div>
+    </aside>
+  </div>
+</main>
+
+<!-- Custom Toast Container -->
+<div id="toast" class="toast-msg">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#25d366" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+  <span id="toastText">समाचारको लिंक Copy गरियो!</span>
+</div>
+
+<footer class="footer">
+  © <span id="year"></span> DailySelibreti. All Rights Reserved.
+</footer>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {getFirestore,doc,getDoc,collection,getDocs,updateDoc,increment,setDoc} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBD6DjQC2NwiOCR3crvsn7qwSaFZ5PPQNk",
+ authDomain:"daily-selibreti.firebaseapp.com",
+ projectId:"daily-selibreti",
+ storageBucket:"daily-selibreti.firebasestorage.app",
+ messagingSenderId:"445067708773",
+ appId:"1:445067708773:web:526028f35a01c29b95f98c"
+};
+
+const $=id=>document.getElementById(id);$("year").textContent=new Date().getFullYear();
+
+function showToast(text="समाचारको लिंक Copy गरियो!"){
+  const toast = $("toast");
+  $("toastText").textContent = text;
+  toast.classList.add("show");
+  setTimeout(() => { toast.classList.remove("show"); }, 3000);
+}
+
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function safeImage(p){const u=String(p.imageUrl||p.image||"");return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:"";}
+function safeDate(p){let v=p.createdAt||p.date;let d=v?.toDate?v.toDate():v?new Date(v):null;return d&&!isNaN(d.getTime())?d.toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}):"DailySelibreti";}
+
+let globalAds = {};
+
+async function trackAdImpression(db, adType) {
+  try {
+    const adRef = doc(db, "settings", "adStats");
+    await setDoc(adRef, {
+      [adType]: increment(1),
+      totalImpressions: increment(1)
+    }, { merge: true });
+  } catch (e) {
+    console.error("Ad Impression Track Error:", e);
+  }
+}
+
+function executeScriptTags(container, db) {
+  const scripts = container.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if(oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+    if(db) trackAdImpression(db, "customAdSlot");
+  });
+}
+
+function loadMonetagAd(code, db) {
+  if (!code) return;
+  const div = document.createElement('div');
+  div.innerHTML = code;
+  document.body.appendChild(div);
+
+  const scripts = div.querySelectorAll("script");
+  scripts.forEach(oldScript => {
+    const newScript = document.createElement("script");
+    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+    if (oldScript.innerHTML) {
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+    }
+    oldScript.parentNode.replaceChild(newScript, oldScript);
+  });
+  if(db) trackAdImpression(db, "monetag");
+}
+
+function renderTextWithAdsAndPhotos(text, db){
+  const cleanStr = String(text||"").trim();
+  if(!cleanStr) return "";
+
+  const blocks = cleanStr.split(/(<h[23][^>]*>.*?<\/h[23]>|<img[^>]*>|\n+)/is).map(b => b.trim()).filter(Boolean);
+  
+  let accumulatedWords = 0;
+  let nextAdThreshold = 70;
+  let adSequenceIndex = 0;
+  let htmlOutput = "";
+
+  const adAdSense = (globalAds && globalAds.adSense70) ? globalAds.adSense70 : ''; 
+  const adCompanyA = (globalAds && globalAds.companyA) ? globalAds.companyA : '';
+  const adCompanyB = (globalAds && globalAds.companyB) ? globalAds.companyB : '';
+  const adCompanyC = (globalAds && globalAds.companyC) ? globalAds.companyC : '';
+
+  const sequenceAds = [adAdSense, adCompanyA, adCompanyB, adCompanyC].filter(Boolean);
+
+  blocks.forEach((block) => {
+    if (/^<h[23][^>]*>.*?<\/h[23]>$/i.test(block)) {
+      htmlOutput += block;
+      return;
+    }
+
+    if (/^<img[^>]*>$/i.test(block)) {
+      htmlOutput += `
+        <div class="article-inline-img-wrap">
+          ${block}
+        </div>
+      `;
+      return;
+    }
+
+    const photoMatch = block.match(/^\[PHOTO:\s*(https?:\/\/[^\s]+)\]$/i);
+    if (photoMatch) {
+      const imgUrl = photoMatch[1];
+      htmlOutput += `
+        <div class="article-inline-img-wrap">
+          <img class="article-inline-img" src="${esc(imgUrl)}" alt="Article Photo" loading="lazy">
+        </div>
+      `;
+      return;
+    }
+
+    const ytMatch = block.match(/^\[YOUTUBE:\s*(https?:\/\/[^\s]+)\]$/i);
+    if (ytMatch) {
+      const ytUrl = ytMatch[1];
+      let videoId = "";
+      if (ytUrl.includes("v=")) {
+        videoId = ytUrl.split("v=")[1].split("&")[0];
+      } else if (ytUrl.includes("youtu.be/")) {
+        videoId = ytUrl.split("youtu.be/")[1].split("?")[0];
+      } else if (ytUrl.includes("embed/")) {
+        videoId = ytUrl.split("embed/")[1].split("?")[0];
+      }
+
+      if (videoId) {
+        htmlOutput += `
+          <div class="article-inline-video-wrap">
+            <div class="video-responsive-container">
+              <iframe src="https://www.youtube.com/embed/${esc(videoId)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+          </div>
+        `;
+        return;
+      }
+    }
+
+    const lines = block.split(/\n+/);
+    lines.forEach(line => {
+      if(!line.trim()) return;
+
+      const wordsInLine = line.split(/\s+/).filter(Boolean).length;
+      accumulatedWords += wordsInLine;
+
+      htmlOutput += `<p>${esc(line)}</p>`;
+
+      if (accumulatedWords >= nextAdThreshold && sequenceAds.length > 0) {
+        const currentAd = sequenceAds[adSequenceIndex % sequenceAds.length];
+
+        if (currentAd) {
+          if(db) trackAdImpression(db, "inArticleAd");
+          htmlOutput += `
+            <div class="auto-ad-banner">
+              <span class="ad-tag">Advertisement / विज्ञापन</span>
+              <div class="ad-slot inline-ad-container">${currentAd}</div>
+            </div>
+          `;
+        }
+
+        adSequenceIndex++;
+        nextAdThreshold += 70;
+      }
+    });
+  });
+
+  return htmlOutput;
+}
+
+function articleLink(p){return "read.html?"+(p.demo?"demo=1&":"")+"id="+encodeURIComponent(p.id);}
+function relatedCard(p){return `<div class="related"><a href="${articleLink(p)}">${safeImage(p)?`<img src="${esc(safeImage(p))}" alt="">`:""}</a><div><h3><a href="${articleLink(p)}">${esc(p.title||"News")}</a></h3><small>${esc(p.category||"News")}</small></div></div>`;}
+
+function updateMetaTags(post, url){
+  const title = post.title || "DailySelibreti";
+  const desc = post.excerpt || post.summary || "DailySelibreti News Update";
+  const img = safeImage(post);
+
+  document.title = title + " | DailySelibreti";
+  $("ogTitle").setAttribute("content", title);
+  $("ogDesc").setAttribute("content", desc);
+  $("ogUrl").setAttribute("content", url);
+  if(img) $("ogImage").setAttribute("content", img);
+}
+
+async function load(){
+ const params=new URLSearchParams(location.search);
+ const id=params.get("id");
+ 
+ if(!id || id === "null" || id === "undefined"){
+    $("pageState").textContent="समाचार ID भेटिएन। Home पेजमा फर्कनुहोस्।";
+    return;
+ }
+
+ let post=null,all=[];
+ try{
+   const app=initializeApp(firebaseConfig),db=getFirestore(app);
+
+   try {
+     const adSnap = await getDoc(doc(db, "settings", "ads"));
+     if (adSnap.exists()) {
+       globalAds = adSnap.data();
+       if (globalAds.monetag) {
+         loadMonetagAd(globalAds.monetag, db);
+       }
+     }
+   } catch(err) {
+     console.error("Ads fetch error:", err);
+   }
+
+   const docRef = doc(db,"news",id);
+   const snap=await getDoc(docRef);
+   
+   if(snap.exists()){
+    const p={id:snap.id,...snap.data()};
+    if(["published","publish"].includes(String(p.status||"").toLowerCase().trim())){
+      post=p;
+      try {
+        await updateDoc(docRef, { views: increment(1) });
+        post.views = (post.views || 0) + 1;
+      } catch(e) { 
+        console.error("View count update error:", e);
+        post.views = (post.views || 0) + 1; 
+      }
+    }
+   }
+   const list=await getDocs(collection(db,"news"));
+   all=list.docs.map(d=>({id:d.id,...d.data()})).filter(p=>["published","publish"].includes(String(p.status||"").toLowerCase().trim()));
+
+   trackAdImpression(db, "pageViewsWithAds");
+
+   const topAdElem = $("topAdSlot");
+   if (globalAds && globalAds.header) {
+     topAdElem.innerHTML = globalAds.header;
+     executeScriptTags(topAdElem, db);
+     trackAdImpression(db, "headerAd");
+   } else {
+     topAdElem.innerHTML = "[ Small Top Ad Banner Area ]";
+   }
+
+   const raw=post.content||post.body||post.article||post.excerpt||post.summary||"यस समाचारको पूरा विवरण उपलब्ध छैन।";
+   const contentElem = $("content");
+   contentElem.innerHTML = renderTextWithAdsAndPhotos(raw, db);
+   executeScriptTags(contentElem, db);
+
+ }catch(e){console.error(e);}
+
+ if(!post){
+   $("pageState").textContent="यो समाचार भेटिएन वा प्रकाशित गरिएको छैन। Home मा फर्केर अर्को समाचार खोल्नुहोस्।";
+   return;
+ }
+
+ updateMetaTags(post, location.href);
+
+ $("pageState").hidden=true;$("layout").hidden=false;
+ $("title").textContent=post.title||"News";
+ $("category").textContent=post.category||"NEWS";
+ $("crumb").textContent=post.category||"News";
+ $("date").textContent=safeDate(post);
+ $("caption").textContent=post.imageCaption||post.imageCredit||"";
+ $("viewsCount").textContent = Number(post.views || 1).toLocaleString('ne-NP');
+
+ const src=safeImage(post);
+ if(src){
+   $("cover").src=src;
+   $("cover").alt=post.title||"News";
+ } else {
+   $("coverWrap").hidden=true;
+ }
+
+ $("related").innerHTML=all.filter(p=>p.id!==post.id).slice(0,5).map(relatedCard).join("")||"थप समाचार उपलब्ध छैन।";
+
+ const postFullUrl = "https://www.dailyselibreti.com/read.html?id=" + encodeURIComponent(post.id);
+ const currentUrl = encodeURIComponent(postFullUrl);
+ const shareText = encodeURIComponent(post.title || "");
+
+ $("shareFb").onclick = () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${currentUrl}`, '_blank');
+ $("shareTw").onclick = () => window.open(`https://twitter.com/intent/tweet?url=${currentUrl}&text=${shareText}`, '_blank');
+ $("shareWa").onclick = () => window.open(`https://api.whatsapp.com/send?text=${shareText}%20${currentUrl}`, '_blank');
+ $("shareTg").onclick = () => window.open(`https://t.me/share/url?url=${currentUrl}&text=${shareText}`, '_blank');
+
+ $("copyBtn").onclick=async()=>{
+  try{
+    await navigator.clipboard.writeText(postFullUrl);
+    showToast("समाचारको लिंक Copy गरियो!");
+  } catch(e){
+    showToast("लिंक Copy गर्न सकिएन!");
+  }
+ };
+}
+
+load();
+</script>
+</body>
+</html>
